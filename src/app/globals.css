@@ -1,0 +1,39 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --ink: #17201a;
+  --muted: #68706a;
+  --line: #dfe5df;
+  --accent: #145c3f;
+  --danger: #a32424;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+a { color: var(--accent); }
+main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 40px 0; }
+.header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 24px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: 0 10px 30px rgba(20, 92, 63, 0.08); margin-bottom: 18px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+.workshop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+.workshop-option { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 4px; }
+.workshop-option.disabled { opacity: 0.55; background: #f3f3f0; }
+label { font-weight: 700; font-size: 14px; }
+input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: white; }
+button, .button { border: 0; border-radius: 10px; background: var(--accent); color: white; padding: 10px 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+button.secondary { background: #5d675f; }
+button.danger { background: var(--danger); }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.muted { color: var(--muted); font-size: 14px; }
+.error { color: var(--danger); font-weight: 700; }
+.success { color: var(--accent); font-weight: 700; }
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; vertical-align: top; }
+.inline-form { display: inline; }
+.admin-workshop { display: grid; grid-template-columns: 2fr 120px 110px 100px auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+@media (max-width: 760px) {
+  .row, .admin-workshop { grid-template-columns: 1fr; }
+  .header { align-items: flex-start; flex-direction: column; }
+}
