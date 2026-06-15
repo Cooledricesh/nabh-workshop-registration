@@ -35,7 +35,7 @@ export async function submitRegistration(_prev: ActionState, formData: FormData)
     const workshops = parseWorkshops(formData.get('workshops'));
     validateBatchRegistration(participants, workshops);
     await registerParticipants(participants);
-    revalidatePath('/');
+    revalidatePath('/workshops');
     revalidatePath('/admin');
     return { ok: true, message: `${participants.length}명 등록이 완료되었습니다.` };
   } catch (error) {

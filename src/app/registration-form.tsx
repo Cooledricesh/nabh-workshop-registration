@@ -17,29 +17,26 @@ const initialRow = (): ParticipantFormRow => ({
 
 const initialState: ActionState = { ok: false, message: '' };
 
-function setSlotSelection(row: ParticipantFormRow, slotWorkshops: WorkshopAvailability[], workshopId: string) {
-  const slotIds = new Set(slotWorkshops.map((workshop) => workshop.id));
+function setWorkshopSelection(row: ParticipantFormRow, workshopId: string) {
   return {
     ...row,
-    workshopIds: [...row.workshopIds.filter((id) => !slotIds.has(id)), ...(workshopId ? [workshopId] : [])],
+    workshopIds: workshopId ? [workshopId] : [],
   };
 }
 
 function WorkshopRadioGroup({
-  label,
   row,
   workshops,
   onChange,
 }: {
-  label: string;
   row: ParticipantFormRow;
   workshops: WorkshopAvailability[];
   onChange: (workshopId: string) => void;
 }) {
-  const selected = row.workshopIds.find((id) => workshops.some((workshop) => workshop.id === id)) ?? '';
+  const selected = row.workshopIds[0] ?? '';
   return (
     <div>
-      <label>{label}</label>
+      <label>참가 워크숍</label>
       <div className="workshop-grid">
         <label className="workshop-option">
           <input type="radio" checked={selected === ''} onChange={() => onChange('')} />
@@ -67,16 +64,10 @@ function WorkshopRadioGroup({
   );
 }
 
-export default function RegistrationForm({
-  morning,
-  afternoon,
-}: {
-  morning: WorkshopAvailability[];
-  afternoon: WorkshopAvailability[];
-}) {
+export default function RegistrationForm({ workshops }: { workshops: WorkshopAvailability[] }) {
   const [state, formAction, pending] = useActionState(submitRegistration, initialState);
   const [rows, setRows] = useState<ParticipantFormRow[]>([initialRow()]);
-  const allWorkshops = useMemo(() => [...morning, ...afternoon], [morning, afternoon]);
+  const allWorkshops = useMemo(() => workshops, [workshops]);
   const participants = rows.map((row) => ({
     name: row.name,
     affiliation: row.affiliation,
@@ -90,7 +81,7 @@ export default function RegistrationForm({
       <input type="hidden" name="workshops" value={JSON.stringify(allWorkshops)} />
 
       <h2>참가자 정보</h2>
-      {rows.map((row, index) => (
+      {rows.map((row) => (
         <div key={row.id} className="card">
           <div className="row">
             <div>
@@ -123,16 +114,9 @@ export default function RegistrationForm({
           </div>
 
           <WorkshopRadioGroup
-            label={`${index + 1}번 참가자 오전 워크숍`}
             row={row}
-            workshops={morning}
-            onChange={(workshopId) => setRows((current) => current.map((item) => item.id === row.id ? setSlotSelection(item, morning, workshopId) : item))}
-          />
-          <WorkshopRadioGroup
-            label={`${index + 1}번 참가자 오후 워크숍`}
-            row={row}
-            workshops={afternoon}
-            onChange={(workshopId) => setRows((current) => current.map((item) => item.id === row.id ? setSlotSelection(item, afternoon, workshopId) : item))}
+            workshops={workshops}
+            onChange={(workshopId) => setRows((current) => current.map((item) => item.id === row.id ? setWorkshopSelection(item, workshopId) : item))}
           />
         </div>
       ))}
@@ -142,7 +126,7 @@ export default function RegistrationForm({
         <button disabled={pending} type="submit">{pending ? '등록 중...' : '일괄 등록'}</button>
       </div>
       {state.message ? <p className={state.ok ? 'success' : 'error'}>{state.message}</p> : null}
-      <p className="muted">한 참가자는 오전 1개, 오후 1개까지만 선택할 수 있습니다. 전체 배치 단위로 정원을 검사합니다.</p>
+      <p className="muted">각 참가자는 워크숍을 선택하지 않거나 1개만 선택할 수 있습니다. 전체 배치 단위로 정원을 검사합니다.</p>
     </form>
   );
 }

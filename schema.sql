@@ -182,17 +182,19 @@ grant usage on schema public to anon, authenticated;
 grant select on public.workshops, public.workshops_with_counts to anon, authenticated;
 grant execute on function public.register_participants_batch(jsonb) to anon, authenticated;
 
-insert into public.workshops (title, slot, capacity, is_open)
-select seed.title, seed.slot, seed.capacity, seed.is_open
-from (values
-  ('오전 워크숍 A', 'morning', 30, true),
-  ('오전 워크숍 B', 'morning', 30, true),
-  ('오전 워크숍 C', 'morning', 30, true),
-  ('오후 워크숍 A', 'afternoon', 30, true),
-  ('오후 워크숍 B', 'afternoon', 30, true),
-  ('오후 워크숍 C', 'afternoon', 30, true),
-  ('오후 워크숍 D', 'afternoon', 30, true)
-) as seed(title, slot, capacity, is_open)
-where not exists (
-  select 1 from public.workshops w where w.title = seed.title and w.slot = seed.slot
+delete from public.workshops
+where title in (
+  '오전 워크숍 A', '오전 워크숍 B', '오전 워크숍 C',
+  '오후 워크숍 A', '오후 워크숍 B', '오후 워크숍 C', '오후 워크숍 D'
 );
+
+insert into public.workshops (id, title, slot, capacity, is_open)
+values
+  ('11111111-1111-4111-8111-111111111111', '회복지향 낮병원 운영 워크숍', 'morning', 30, true),
+  ('22222222-2222-4222-8222-222222222222', '가족·지역사회 연계 워크숍', 'morning', 30, true),
+  ('33333333-3333-4333-8333-333333333333', '위기대응 및 사례관리 워크숍', 'morning', 30, true)
+on conflict (id) do update set
+  title = excluded.title,
+  slot = excluded.slot,
+  capacity = excluded.capacity,
+  is_open = excluded.is_open;
