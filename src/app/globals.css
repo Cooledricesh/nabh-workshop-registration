@@ -16,9 +16,11 @@ main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 40px 0; 
 .header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 24px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: 0 10px 30px rgba(20, 92, 63, 0.08); margin-bottom: 18px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.row { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 10px; align-items: end; margin-bottom: 10px; }
-.workshop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
-.workshop-option { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 4px; }
+.row { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 10px; align-items: flex-end; margin-bottom: 10px; }
+.workshop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+.workshop-option { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; align-items: start; background: white; min-height: 78px; }
+.workshop-option strong { font-size: 14px; line-height: 1.35; }
+.workshop-option .muted { grid-column: 2; }
 .workshop-option.disabled { opacity: 0.55; background: #f3f3f0; }
 label { font-weight: 700; font-size: 14px; }
 input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: white; }
@@ -49,8 +51,15 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .timeline-item { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcfa; }
 .timeline-item time { color: var(--accent); font-weight: 800; }
 .timeline-item p { margin: 6px 0 0; color: var(--muted); }
-.lookup-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+.lookup-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: flex-end; }
 .lookup-results { display: grid; gap: 12px; margin-top: 16px; }
+.participant-card { display: grid; gap: 18px; background: #fffdf8; }
+.participant-heading { display: flex; justify-content: space-between; gap: 12px; align-items: flex-end; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.participant-heading h3 { margin: 0; font-size: 20px; }
+.participant-heading p { margin: 0; }
+.workshop-section { border: 1px solid #d8e6dc; border-radius: 16px; padding: 16px; margin: 0; background: linear-gradient(180deg, #f7fcf9, #ffffff); }
+.workshop-section + .workshop-section { margin-top: 2px; background: linear-gradient(180deg, #fffaf0, #ffffff); border-color: #eadfca; }
+.workshop-section legend { padding: 0 10px; color: var(--accent); font-size: 16px; font-weight: 900; }
 .workshop-list { display: grid; gap: 12px; }
 .workshop-summary { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fbfcfa; }
 .workshop-summary span { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: white; font-weight: 800; flex: 0 0 auto; }
@@ -72,5 +81,7 @@ th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; 
 @media (max-width: 760px) {
   .row, .admin-workshop, .timeline-item, .agenda-row, .lookup-form { grid-template-columns: 1fr; }
   .header, .compact-hero { align-items: flex-start; flex-direction: column; }
+  .participant-heading { align-items: flex-start; flex-direction: column; }
+  .workshop-grid { grid-template-columns: 1fr; }
   .hero { padding: 24px; }
 }

@@ -39,12 +39,12 @@ function WorkshopRadioGroup({
 }) {
   const selected = row.workshopIds.find((id) => workshops.some((workshop) => workshop.id === id)) ?? '';
   return (
-    <div>
-      <label>{label}</label>
+    <fieldset className="workshop-section">
+      <legend>{label}</legend>
       <div className="workshop-grid">
         <label className="workshop-option">
           <input type="radio" checked={selected === ''} onChange={() => onChange('')} />
-          선택 안 함
+          <strong>선택 안 함</strong>
         </label>
         {workshops.map((workshop) => {
           const selectable = isWorkshopSelectable(workshop);
@@ -64,7 +64,7 @@ function WorkshopRadioGroup({
           );
         })}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -88,7 +88,11 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
 
       <h2>참가자 정보</h2>
       {rows.map((row, index) => (
-        <div key={row.id} className="card">
+        <div key={row.id} className="card participant-card">
+          <div className="participant-heading">
+            <h3>참가자 {index + 1}</h3>
+            <p className="muted">기본 정보 입력 후 오전/오후 워크숍을 각각 선택해주세요.</p>
+          </div>
           <div className="row">
             <div>
               <label>이름</label>
@@ -129,13 +133,13 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
           </div>
 
           <WorkshopRadioGroup
-            label={`${index + 1}번 참가자 오전 워크숍`}
+            label="오전 워크숍"
             row={row}
             workshops={morning}
             onChange={(workshopId) => setRows((current) => current.map((item) => item.id === row.id ? setSlotSelection(item, morning, workshopId) : item))}
           />
           <WorkshopRadioGroup
-            label={`${index + 1}번 참가자 오후 워크숍`}
+            label="오후 워크숍"
             row={row}
             workshops={afternoon}
             onChange={(workshopId) => setRows((current) => current.map((item) => item.id === row.id ? setSlotSelection(item, afternoon, workshopId) : item))}

@@ -79,6 +79,8 @@ describe('public page structure and copy', () => {
 
     expect(registrationForm).toContain('오전 워크숍');
     expect(registrationForm).toContain('오후 워크숍');
+    expect(registrationForm).not.toContain('번 참가자 오전 워크숍');
+    expect(registrationForm).not.toContain('번 참가자 오후 워크숍');
     expect(registrationForm).toContain('조회용 비밀번호');
     expect(rootPage).toContain('/admin');
     expect(rootPage).toContain('/lookup');
