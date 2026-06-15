@@ -185,14 +185,19 @@ grant execute on function public.register_participants_batch(jsonb) to anon, aut
 delete from public.workshops
 where title in (
   '오전 워크숍 A', '오전 워크숍 B', '오전 워크숍 C',
-  '오후 워크숍 A', '오후 워크숍 B', '오후 워크숍 C', '오후 워크숍 D'
+  '오후 워크숍 A', '오후 워크숍 B', '오후 워크숍 C', '오후 워크숍 D',
+  '회복지향 낮병원 운영 워크숍', '가족·지역사회 연계 워크숍', '위기대응 및 사례관리 워크숍'
 );
 
 insert into public.workshops (id, title, slot, capacity, is_open)
 values
-  ('11111111-1111-4111-8111-111111111111', '회복지향 낮병원 운영 워크숍', 'morning', 30, true),
-  ('22222222-2222-4222-8222-222222222222', '가족·지역사회 연계 워크숍', 'morning', 30, true),
-  ('33333333-3333-4333-8333-333333333333', '위기대응 및 사례관리 워크숍', 'morning', 30, true)
+  ('11111111-1111-4111-8111-111111111111', 'Quality Rights(아주대)', 'morning', 30, true),
+  ('22222222-2222-4222-8222-222222222222', 'Personal Medicine(대동병원)', 'morning', 30, true),
+  ('33333333-3333-4333-8333-333333333333', '미술치료의 이해(이음병원)', 'morning', 30, true),
+  ('44444444-4444-4444-8444-444444444444', 'V-cat(대동병원)', 'afternoon', 30, true),
+  ('55555555-5555-4555-8555-555555555555', '음악치료의 이해(이음병원)', 'afternoon', 30, true),
+  ('66666666-6666-4666-8666-666666666666', '행복한 미술(다움병원)', 'afternoon', 30, true),
+  ('77777777-7777-4777-8777-777777777777', '숲길(참사랑병원)', 'afternoon', 30, true)
 on conflict (id) do update set
   title = excluded.title,
   slot = excluded.slot,

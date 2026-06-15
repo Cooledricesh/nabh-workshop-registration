@@ -32,25 +32,43 @@ describe('public page structure and copy', () => {
     expect(rootPage).not.toContain('RegistrationForm');
   });
 
-  it('shows the fixed MVP symposium schedule with opening, choir, and three simultaneous 10-12 workshops', () => {
+  it('shows the confirmed symposium schedule and fixed workshop seeds', () => {
     const rootPage = read('src/app/page.tsx');
     const schema = read('schema.sql');
+    const registrationForm = read('src/app/registration-form.tsx');
 
-    expect(rootPage).toContain('09:30');
-    expect(rootPage).toContain('개회');
-    expect(rootPage).toContain('병원 합창');
-    expect(rootPage).toContain('10:00–12:00');
-    expect(rootPage).toContain('동시 진행');
+    for (const text of [
+      '09:30',
+      '집결',
+      '은하수 합창단',
+      '개회',
+      'Quality Rights(아주대)',
+      'Personal Medicine(대동병원)',
+      '미술치료의 이해(이음병원)',
+      '자유시간',
+      '동촌유원지-대돈가',
+      '박상운 병원장',
+      'V-cat(대동병원)',
+      '음악치료의 이해(이음병원)',
+      '행복한 미술(다움병원)',
+      '숲길(참사랑병원)',
+    ]) {
+      expect(rootPage).toContain(text);
+    }
 
-    const fixedWorkshopSeeds = [
-      '회복지향 낮병원 운영 워크숍',
-      '가족·지역사회 연계 워크숍',
-      '위기대응 및 사례관리 워크숍',
-    ];
-
-    for (const title of fixedWorkshopSeeds) {
+    for (const title of [
+      'Quality Rights(아주대)',
+      'Personal Medicine(대동병원)',
+      '미술치료의 이해(이음병원)',
+      'V-cat(대동병원)',
+      '음악치료의 이해(이음병원)',
+      '행복한 미술(다움병원)',
+      '숲길(참사랑병원)',
+    ]) {
       expect(schema).toContain(title);
     }
-    expect(schema).not.toContain("'오후 워크숍 A', 'afternoon'");
+
+    expect(registrationForm).toContain('오전 워크숍');
+    expect(registrationForm).toContain('오후 워크숍');
   });
 });
