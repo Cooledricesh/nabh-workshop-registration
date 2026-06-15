@@ -471,6 +471,99 @@ as $$
   order by w.slot desc, w.created_at asc;
 $$;
 
+drop function if exists public.admin_create_workshop(text, text, integer, boolean);
+
+create or replace function public.admin_create_workshop(
+  title_input text,
+  slot_input text,
+  capacity_input integer,
+  is_open_input boolean
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_id uuid;
+begin
+  if trim(coalesce(title_input, '')) = '' then
+    raise exception '워크숍 제목을 입력해 주세요.';
+  end if;
+  if slot_input not in ('morning', 'afternoon') then
+    raise exception '세션이 올바르지 않습니다.';
+  end if;
+  if capacity_input < 0 then
+    raise exception '정원은 0 이상의 정수여야 합니다.';
+  end if;
+
+  insert into public.workshops (title, slot, capacity, is_open)
+  values (trim(title_input), slot_input, capacity_input, coalesce(is_open_input, false))
+  returning id into new_id;
+
+  return new_id;
+end;
+$$;
+
+drop function if exists public.admin_update_workshop(uuid, text, text, integer, boolean);
+
+create or replace function public.admin_update_workshop(
+  workshop_id uuid,
+  title_input text,
+  slot_input text,
+  capacity_input integer,
+  is_open_input boolean
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if trim(coalesce(title_input, '')) = '' then
+    raise exception '워크숍 제목을 입력해 주세요.';
+  end if;
+  if slot_input not in ('morning', 'afternoon') then
+    raise exception '세션이 올바르지 않습니다.';
+  end if;
+  if capacity_input < 0 then
+    raise exception '정원은 0 이상의 정수여야 합니다.';
+  end if;
+
+  update public.workshops
+  set title = trim(title_input),
+      slot = slot_input,
+      capacity = capacity_input,
+      is_open = coalesce(is_open_input, false)
+  where id = workshop_id;
+
+  if not found then
+    raise exception '워크숍을 찾을 수 없습니다.';
+  end if;
+
+  return true;
+end;
+$$;
+
+drop function if exists public.admin_delete_workshop(uuid);
+
+create or replace function public.admin_delete_workshop(workshop_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public.workshops where id = workshop_id;
+
+  if not found then
+    raise exception '워크숍을 찾을 수 없습니다.';
+  end if;
+
+  return true;
+end;
+$$;
+
 alter table public.workshops enable row level security;
 alter table public.registration_groups enable row level security;
 alter table public.registrations enable row level security;
@@ -490,6 +583,9 @@ grant execute on function public.update_registration_workshops(text, text, uuid,
 grant execute on function public.delete_registration(text, text, uuid) to anon, authenticated;
 grant execute on function public.list_admin_registrations() to anon, authenticated;
 grant execute on function public.list_admin_workshop_registrants() to anon, authenticated;
+grant execute on function public.admin_create_workshop(text, text, integer, boolean) to anon, authenticated;
+grant execute on function public.admin_update_workshop(uuid, text, text, integer, boolean) to anon, authenticated;
+grant execute on function public.admin_delete_workshop(uuid) to anon, authenticated;
 
 delete from public.workshops
 where title in (
@@ -503,7 +599,7 @@ values
   ('11111111-1111-4111-8111-111111111111', 'Quality Rights(아주대)', 'morning', 25, true),
   ('22222222-2222-4222-8222-222222222222', 'Personal Medicine(대동병원)', 'morning', 25, true),
   ('33333333-3333-4333-8333-333333333333', '미술치료의 이해(이음병원)', 'morning', 25, true),
-  ('44444444-4444-4444-8444-444444444444', 'V-cat(대동병원)', 'afternoon', 25, true),
+  ('44444444-4444-4444-8444-444444444444', 'V-cat(대동병원)', 'afternoon', 10, true),
   ('55555555-5555-4555-8555-555555555555', '음악치료의 이해(이음병원)', 'afternoon', 25, true),
   ('66666666-6666-4666-8666-666666666666', '행복한 미술(다움병원)', 'afternoon', 25, true),
   ('77777777-7777-4777-8777-777777777777', '슐렌(참사랑병원)', 'afternoon', 25, true)

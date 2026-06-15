@@ -69,27 +69,30 @@ export async function listWorkshops(): Promise<WorkshopAvailability[]> {
 
 export async function createWorkshop(input: { title: string; slot: SessionSlot; capacity: number; isOpen: boolean }) {
   const supabase = getSupabaseServerClient();
-  const { error } = await supabase.from('workshops').insert({
-    title: input.title,
-    slot: input.slot,
-    capacity: input.capacity,
-    is_open: input.isOpen,
+  const { error } = await supabase.rpc('admin_create_workshop', {
+    title_input: input.title,
+    slot_input: input.slot,
+    capacity_input: input.capacity,
+    is_open_input: input.isOpen,
   });
   if (error) throw new Error(error.message);
 }
 
 export async function updateWorkshop(input: { id: string; title: string; slot: SessionSlot; capacity: number; isOpen: boolean }) {
   const supabase = getSupabaseServerClient();
-  const { error } = await supabase
-    .from('workshops')
-    .update({ title: input.title, slot: input.slot, capacity: input.capacity, is_open: input.isOpen })
-    .eq('id', input.id);
+  const { error } = await supabase.rpc('admin_update_workshop', {
+    workshop_id: input.id,
+    title_input: input.title,
+    slot_input: input.slot,
+    capacity_input: input.capacity,
+    is_open_input: input.isOpen,
+  });
   if (error) throw new Error(error.message);
 }
 
 export async function deleteWorkshop(id: string) {
   const supabase = getSupabaseServerClient();
-  const { error } = await supabase.from('workshops').delete().eq('id', id);
+  const { error } = await supabase.rpc('admin_delete_workshop', { workshop_id: id });
   if (error) throw new Error(error.message);
 }
 

@@ -117,7 +117,11 @@ describe('public page structure and copy', () => {
     expect(adminPage).toContain('워크숍별 신청자');
     expect(adminPage).toContain('registrationsByWorkshop');
     expect(dataLayer).toContain('listRegistrationsByWorkshop');
+    expect(dataLayer).toContain("admin_update_workshop");
+    expect(dataLayer).toContain("admin_create_workshop");
+    expect(dataLayer).toContain("admin_delete_workshop");
     expect(schema).toContain("'Quality Rights(아주대)', 'morning', 25");
+    expect(schema).toContain("'V-cat(대동병원)', 'afternoon', 10");
     expect(schema).toContain("'슐렌(참사랑병원)', 'afternoon', 25");
   });
 });
