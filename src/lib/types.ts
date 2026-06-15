@@ -13,8 +13,12 @@ export type ParticipantDraft = {
   name: string;
   affiliation: string;
   position: string;
-  password: string;
   workshopIds: string[];
+};
+
+export type RepresentativeCredentials = {
+  name: string;
+  password: string;
 };
 
 export type RegistrationRow = {
@@ -27,5 +31,6 @@ export type RegistrationRow = {
 };
 
 export type RegistrationLookupResult = RegistrationRow & {
+  groupId: string;
   passwordMatched: true;
 };

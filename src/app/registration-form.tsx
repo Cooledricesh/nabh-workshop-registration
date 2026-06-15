@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from 'react';
 import { submitRegistration, type ActionState } from './actions';
 import { getRemainingSeats, isWorkshopSelectable } from '@/lib/registration';
-import type { ParticipantDraft, WorkshopAvailability } from '@/lib/types';
+import type { ParticipantDraft, RepresentativeCredentials, WorkshopAvailability } from '@/lib/types';
 
 type ParticipantFormRow = ParticipantDraft & { id: string };
 
@@ -12,10 +12,10 @@ const initialRow = (): ParticipantFormRow => ({
   name: '',
   affiliation: '',
   position: '',
-  password: '',
   workshopIds: [],
 });
 
+const initialRepresentative = (): RepresentativeCredentials => ({ name: '', password: '' });
 const initialState: ActionState = { ok: false, message: '' };
 
 function setSlotSelection(row: ParticipantFormRow, slotWorkshops: WorkshopAvailability[], workshopId: string) {
@@ -70,6 +70,8 @@ function WorkshopRadioGroup({
 
 export default function RegistrationForm({ workshops }: { workshops: WorkshopAvailability[] }) {
   const [state, formAction, pending] = useActionState(submitRegistration, initialState);
+  const [representative, setRepresentative] = useState<RepresentativeCredentials>(initialRepresentative);
+  const [isRepresentativeReady, setIsRepresentativeReady] = useState(false);
   const [rows, setRows] = useState<ParticipantFormRow[]>([initialRow()]);
   const morning = useMemo(() => workshops.filter((workshop) => workshop.slot === 'morning'), [workshops]);
   const afternoon = useMemo(() => workshops.filter((workshop) => workshop.slot === 'afternoon'), [workshops]);
@@ -77,23 +79,70 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
     name: row.name,
     affiliation: row.affiliation,
     position: row.position,
-    password: row.password,
     workshopIds: row.workshopIds,
   }));
 
+  if (!isRepresentativeReady) {
+    return (
+      <section className="card representative-card">
+        <h2>대표자 정보</h2>
+        <p className="muted">대표자 한 명의 이름과 조회용 비밀번호로 여러 참가자를 등록하고, 나중에 전체 신청 내역을 한 번에 확인·변경할 수 있습니다.</p>
+        <div className="lookup-form">
+          <div>
+            <label>대표자 이름</label>
+            <input
+              value={representative.name}
+              onChange={(event) => setRepresentative((current) => ({ ...current, name: event.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <label>조회용 비밀번호</label>
+            <input
+              type="password"
+              value={representative.password}
+              onChange={(event) => setRepresentative((current) => ({ ...current, password: event.target.value }))}
+              required
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (representative.name.trim() && representative.password.trim()) {
+                setIsRepresentativeReady(true);
+              }
+            }}
+            disabled={!representative.name.trim() || !representative.password.trim()}
+          >
+            대표자 확인 후 워크숍 선택하기
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <form action={formAction} className="card">
+      <input type="hidden" name="representativeName" value={representative.name.trim()} />
+      <input type="hidden" name="representativePassword" value={representative.password.trim()} />
       <input type="hidden" name="participants" value={JSON.stringify(participants)} />
       <input type="hidden" name="workshops" value={JSON.stringify(workshops)} />
 
-      <h2>참가자 정보</h2>
+      <div className="participant-heading">
+        <div>
+          <p className="muted">대표자: {representative.name}</p>
+          <h2>참가자 정보와 워크숍 선택</h2>
+        </div>
+        <button type="button" className="secondary" onClick={() => setIsRepresentativeReady(false)}>대표자 정보 수정</button>
+      </div>
+
       {rows.map((row, index) => (
         <div key={row.id} className="card participant-card">
           <div className="participant-heading">
             <h3>참가자 {index + 1}</h3>
-            <p className="muted">기본 정보 입력 후 오전/오후 워크숍을 각각 선택해주세요.</p>
+            <p className="muted">참가자별로 오전/오후 워크숍을 각각 선택할 수 있습니다.</p>
           </div>
-          <div className="row">
+          <div className="row participant-info-row">
             <div>
               <label>이름</label>
               <input
@@ -115,15 +164,6 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
               <input
                 value={row.position}
                 onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, position: event.target.value } : item))}
-                required
-              />
-            </div>
-            <div>
-              <label>조회용 비밀번호</label>
-              <input
-                type="password"
-                value={row.password}
-                onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, password: event.target.value } : item))}
                 required
               />
             </div>

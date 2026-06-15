@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   RegistrationValidationError,
   summarizeWorkshopDemand,
+  validateRepresentativeCredentials,
   validateBatchRegistration,
   type ParticipantDraft,
   type WorkshopAvailability,
@@ -19,9 +20,20 @@ const baseParticipant: ParticipantDraft = {
   name: '홍길동',
   affiliation: '낮병원',
   position: '전문의',
-  password: '1234',
   workshopIds: [],
 };
+
+describe('validateRepresentativeCredentials', () => {
+  it('requires one representative name and lookup password for the whole batch', () => {
+    expect(validateRepresentativeCredentials({ name: ' 대표자 ', password: ' 1234 ' })).toEqual({
+      name: '대표자',
+      password: '1234',
+    });
+
+    expect(() => validateRepresentativeCredentials({ name: '', password: '1234' })).toThrow('대표자 이름');
+    expect(() => validateRepresentativeCredentials({ name: '대표자', password: '' })).toThrow('조회용 비밀번호');
+  });
+});
 
 describe('validateBatchRegistration', () => {
   it('allows zero workshops and one workshop per time slot', () => {

@@ -3,12 +3,24 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { clearAdminSession, isAdminAuthenticated, setAdminSession, verifyAdminPassword } from '@/lib/admin-auth';
-import { createWorkshop, deleteWorkshop, lookupRegistrations, registerParticipants, updateWorkshop } from '@/lib/data';
-import { validateBatchRegistration } from '@/lib/registration';
-import type { ParticipantDraft, RegistrationLookupResult, SessionSlot, WorkshopAvailability } from '@/lib/types';
+import {
+  createWorkshop,
+  deleteWorkshop,
+  listWorkshops,
+  lookupRegistrations,
+  registerParticipants,
+  updateRegistrationWorkshops,
+  updateWorkshop,
+} from '@/lib/data';
+import { validateBatchRegistration, validateRepresentativeCredentials } from '@/lib/registration';
+import type { ParticipantDraft, RegistrationLookupResult, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from '@/lib/types';
 
 export type ActionState = { ok: boolean; message: string };
-export type LookupState = ActionState & { results: RegistrationLookupResult[] };
+export type LookupState = ActionState & {
+  results: RegistrationLookupResult[];
+  workshops: WorkshopAvailability[];
+  credentials?: RepresentativeCredentials;
+};
 
 function parseParticipants(raw: FormDataEntryValue | null): ParticipantDraft[] {
   if (typeof raw !== 'string') {
@@ -19,7 +31,6 @@ function parseParticipants(raw: FormDataEntryValue | null): ParticipantDraft[] {
     name: participant.name.trim(),
     affiliation: participant.affiliation.trim(),
     position: participant.position.trim(),
-    password: participant.password.trim(),
     workshopIds: Array.from(new Set(participant.workshopIds.filter(Boolean))),
   }));
 }
@@ -31,34 +42,68 @@ function parseWorkshops(raw: FormDataEntryValue | null): WorkshopAvailability[] 
   return JSON.parse(raw) as WorkshopAvailability[];
 }
 
+function parseRepresentative(formData: FormData): RepresentativeCredentials {
+  return validateRepresentativeCredentials({
+    name: String(formData.get('representativeName') ?? formData.get('name') ?? ''),
+    password: String(formData.get('representativePassword') ?? formData.get('password') ?? ''),
+  });
+}
+
+function parseWorkshopIds(formData: FormData): string[] {
+  return Array.from(new Set(formData.getAll('workshopIds').map(String).filter(Boolean)));
+}
+
 export async function submitRegistration(_prev: ActionState, formData: FormData): Promise<ActionState> {
   try {
+    const representative = parseRepresentative(formData);
     const participants = parseParticipants(formData.get('participants'));
     const workshops = parseWorkshops(formData.get('workshops'));
     validateBatchRegistration(participants, workshops);
-    await registerParticipants(participants);
+    await registerParticipants(representative, participants);
     revalidatePath('/workshops');
+    revalidatePath('/lookup');
     revalidatePath('/admin');
-    return { ok: true, message: `${participants.length}명 등록이 완료되었습니다.` };
+    return { ok: true, message: `${participants.length}명 등록이 완료되었습니다. 대표자 이름과 비밀번호로 전체 신청 내역을 조회할 수 있습니다.` };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : '등록에 실패했습니다.' };
   }
 }
 
 export async function lookupRegistrationAction(_prev: LookupState, formData: FormData): Promise<LookupState> {
+  const workshops = await listWorkshops();
   try {
-    const name = String(formData.get('name') ?? '').trim();
-    const password = String(formData.get('password') ?? '').trim();
-    if (!name || !password) {
-      return { ok: false, message: '이름과 비밀번호를 모두 입력해 주세요.', results: [] };
+    const representative = parseRepresentative(formData);
+    const intent = String(formData.get('intent') ?? 'lookup');
+
+    if (intent === 'update') {
+      const registrationId = String(formData.get('registrationId') ?? '');
+      if (!registrationId) {
+        return { ok: false, message: '수정할 참가자를 찾을 수 없습니다.', results: [], workshops, credentials: representative };
+      }
+      await updateRegistrationWorkshops({
+        ...representative,
+        registrationId,
+        workshopIds: parseWorkshopIds(formData),
+      });
+      revalidatePath('/workshops');
+      revalidatePath('/lookup');
+      revalidatePath('/admin');
     }
-    const results = await lookupRegistrations({ name, password });
+
+    const results = await lookupRegistrations(representative);
     if (results.length === 0) {
-      return { ok: false, message: '일치하는 등록 내역이 없습니다.', results: [] };
+      return { ok: false, message: '일치하는 등록 내역이 없습니다.', results: [], workshops, credentials: representative };
     }
-    return { ok: true, message: `${results.length}건의 등록 내역을 찾았습니다.`, results };
+
+    return {
+      ok: true,
+      message: intent === 'update' ? '워크숍 신청 내역을 변경했습니다.' : `${results.length}명의 등록 내역을 찾았습니다.`,
+      results,
+      workshops,
+      credentials: representative,
+    };
   } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : '등록 내역 조회에 실패했습니다.', results: [] };
+    return { ok: false, message: error instanceof Error ? error.message : '등록 내역 처리에 실패했습니다.', results: [], workshops };
   }
 }
 

@@ -53,10 +53,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .timeline-item p { margin: 6px 0 0; color: var(--muted); }
 .lookup-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: flex-end; }
 .lookup-results { display: grid; gap: 12px; margin-top: 16px; }
+.representative-card { display: grid; gap: 14px; }
 .participant-card { display: grid; gap: 18px; background: #fffdf8; }
 .participant-heading { display: flex; justify-content: space-between; gap: 12px; align-items: flex-end; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
 .participant-heading h3 { margin: 0; font-size: 20px; }
 .participant-heading p { margin: 0; }
+.participant-info-row { grid-template-columns: repeat(3, 1fr) auto; }
+.lookup-result-card { display: grid; grid-template-columns: minmax(180px, 0.7fr) 1.3fr; gap: 16px; border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: #fbfcfa; }
+.lookup-edit-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: flex-end; }
 .workshop-section { border: 1px solid #d8e6dc; border-radius: 16px; padding: 16px; margin: 0; background: linear-gradient(180deg, #f7fcf9, #ffffff); }
 .workshop-section + .workshop-section { margin-top: 2px; background: linear-gradient(180deg, #fffaf0, #ffffff); border-color: #eadfca; }
 .workshop-section legend { padding: 0 10px; color: var(--accent); font-size: 16px; font-weight: 900; }
@@ -79,7 +83,7 @@ th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; 
 .inline-form { display: inline; }
 .admin-workshop { display: grid; grid-template-columns: 2fr 120px 110px 100px auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
 @media (max-width: 760px) {
-  .row, .admin-workshop, .timeline-item, .agenda-row, .lookup-form { grid-template-columns: 1fr; }
+  .row, .admin-workshop, .timeline-item, .agenda-row, .lookup-form, .lookup-result-card, .lookup-edit-form, .participant-info-row { grid-template-columns: 1fr; }
   .header, .compact-hero { align-items: flex-start; flex-direction: column; }
   .participant-heading { align-items: flex-start; flex-direction: column; }
   .workshop-grid { grid-template-columns: 1fr; }

@@ -1,46 +1,109 @@
 'use client';
 
 import { useActionState } from 'react';
+import { getRemainingSeats, isWorkshopSelectable } from '@/lib/registration';
+import type { RegistrationLookupResult, SessionSlot, WorkshopAvailability } from '@/lib/types';
 import { lookupRegistrationAction, type LookupState } from '../actions';
 
-const initialState: LookupState = { ok: false, message: '', results: [] };
+function makeInitialState(workshops: WorkshopAvailability[]): LookupState {
+  return { ok: false, message: '', results: [], workshops };
+}
 
-export default function LookupForm() {
-  const [state, formAction, pending] = useActionState(lookupRegistrationAction, initialState);
+function selectedWorkshopId(registration: RegistrationLookupResult, slot: SessionSlot) {
+  return registration.workshops.find((workshop) => workshop.slot === slot)?.id ?? '';
+}
+
+function WorkshopSelect({
+  label,
+  name,
+  slot,
+  workshops,
+  currentWorkshopId,
+}: {
+  label: string;
+  name: string;
+  slot: SessionSlot;
+  workshops: WorkshopAvailability[];
+  currentWorkshopId: string;
+}) {
+  const slotWorkshops = workshops.filter((workshop) => workshop.slot === slot);
+  return (
+    <div>
+      <label>{label}</label>
+      <select name={name} defaultValue={currentWorkshopId}>
+        <option value="">선택 안 함</option>
+        {slotWorkshops.map((workshop) => {
+          const isCurrent = workshop.id === currentWorkshopId;
+          const selectable = isCurrent || isWorkshopSelectable(workshop);
+          return (
+            <option key={workshop.id} value={workshop.id} disabled={!selectable}>
+              {workshop.title} · {selectable ? `잔여 ${getRemainingSeats(workshop)} / 정원 ${workshop.capacity}` : '마감'}
+            </option>
+          );
+        })}
+      </select>
+    </div>
+  );
+}
+
+export default function LookupForm({ workshops }: { workshops: WorkshopAvailability[] }) {
+  const [state, formAction, pending] = useActionState(lookupRegistrationAction, makeInitialState(workshops));
+  const currentWorkshops = state.workshops.length ? state.workshops : workshops;
+  const credentials = state.credentials;
 
   return (
     <section className="card">
-      <h2>내 등록 확인</h2>
-      <p className="muted">등록할 때 입력한 이름과 조회용 비밀번호로 신청한 워크숍을 확인할 수 있습니다.</p>
+      <h2>대표자 기준 등록 확인</h2>
+      <p className="muted">대표자 이름과 조회용 비밀번호를 입력하면, 해당 대표자가 등록한 모든 참가자와 워크숍 신청 내역을 한 번에 확인하고 변경할 수 있습니다.</p>
       <form action={formAction} className="lookup-form">
+        <input type="hidden" name="intent" value="lookup" />
         <div>
-          <label>이름</label>
-          <input name="name" required />
+          <label>대표자 이름</label>
+          <input name="name" defaultValue={credentials?.name ?? ''} required />
         </div>
         <div>
           <label>조회용 비밀번호</label>
-          <input name="password" type="password" required />
+          <input name="password" type="password" defaultValue={credentials?.password ?? ''} required />
         </div>
         <button type="submit" disabled={pending}>{pending ? '조회 중...' : '조회하기'}</button>
       </form>
       {state.message ? <p className={state.ok ? 'success' : 'error'}>{state.message}</p> : null}
       {state.results.length ? (
         <div className="lookup-results">
-          {state.results.map((registration) => (
-            <article key={registration.id} className="workshop-option">
-              <strong>{registration.name}</strong>
-              <span className="muted">{registration.affiliation} · {registration.position}</span>
-              <span className="muted">등록시각: {new Date(registration.createdAt).toLocaleString('ko-KR')}</span>
-              <div>
-                <strong>선택 워크숍</strong>
-                <ul>
-                  {registration.workshops.length ? registration.workshops.map((workshop) => (
-                    <li key={workshop.id}>{workshop.slot === 'morning' ? '오전' : '오후'} · {workshop.title}</li>
-                  )) : <li>선택 없음</li>}
-                </ul>
-              </div>
-            </article>
-          ))}
+          {state.results.map((registration) => {
+            const morningId = selectedWorkshopId(registration, 'morning');
+            const afternoonId = selectedWorkshopId(registration, 'afternoon');
+            return (
+              <article key={registration.id} className="lookup-result-card">
+                <div>
+                  <strong>{registration.name}</strong>
+                  <p className="muted">{registration.affiliation} · {registration.position}</p>
+                  <p className="muted">등록시각: {new Date(registration.createdAt).toLocaleString('ko-KR')}</p>
+                </div>
+                <form action={formAction} className="lookup-edit-form">
+                  <input type="hidden" name="intent" value="update" />
+                  <input type="hidden" name="name" value={credentials?.name ?? ''} />
+                  <input type="hidden" name="password" value={credentials?.password ?? ''} />
+                  <input type="hidden" name="registrationId" value={registration.id} />
+                  <WorkshopSelect
+                    label="오전 워크숍"
+                    name="workshopIds"
+                    slot="morning"
+                    workshops={currentWorkshops}
+                    currentWorkshopId={morningId}
+                  />
+                  <WorkshopSelect
+                    label="오후 워크숍"
+                    name="workshopIds"
+                    slot="afternoon"
+                    workshops={currentWorkshops}
+                    currentWorkshopId={afternoonId}
+                  />
+                  <button type="submit" disabled={pending}>{pending ? '변경 중...' : '이 참가자 신청 변경'}</button>
+                </form>
+              </article>
+            );
+          })}
         </div>
       ) : null}
     </section>

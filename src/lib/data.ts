@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { RegistrationLookupResult, RegistrationRow, SessionSlot, WorkshopAvailability } from './types';
+import type { RegistrationLookupResult, RegistrationRow, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from './types';
 import { getSupabaseServerClient } from './supabase';
 
 type WorkshopRow = {
@@ -26,6 +26,7 @@ type RegistrationDataRow = {
 };
 
 type RegistrationLookupRow = {
+  group_id: string;
   id: string;
   created_at: string;
   name: string;
@@ -87,17 +88,19 @@ export async function deleteWorkshop(id: string) {
   if (error) throw new Error(error.message);
 }
 
-export async function registerParticipants(participants: unknown) {
+export async function registerParticipants(representative: RepresentativeCredentials, participants: unknown) {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.rpc('register_participants_batch', {
+    representative_name_input: representative.name,
+    representative_password_input: representative.password,
     participants_payload: participants,
   });
 
   if (error) throw new Error(error.message);
-  return data as { registration_ids: string[] };
+  return data as { group_id: string; registration_ids: string[] };
 }
 
-export async function lookupRegistrations(input: { name: string; password: string }): Promise<RegistrationLookupResult[]> {
+export async function lookupRegistrations(input: RepresentativeCredentials): Promise<RegistrationLookupResult[]> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.rpc('find_registrations_by_name_password', {
     lookup_name: input.name,
@@ -107,6 +110,7 @@ export async function lookupRegistrations(input: { name: string; password: strin
   if (error) throw new Error(error.message);
 
   return (data as RegistrationLookupRow[]).map((row) => ({
+    groupId: row.group_id,
     id: row.id,
     createdAt: row.created_at,
     name: row.name,
@@ -115,6 +119,18 @@ export async function lookupRegistrations(input: { name: string; password: strin
     workshops: normalizeWorkshops(row.workshops),
     passwordMatched: true,
   }));
+}
+
+export async function updateRegistrationWorkshops(input: RepresentativeCredentials & { registrationId: string; workshopIds: string[] }) {
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase.rpc('update_registration_workshops', {
+    lookup_name: input.name,
+    lookup_password: input.password,
+    target_registration_id: input.registrationId,
+    workshop_ids_payload: input.workshopIds,
+  });
+
+  if (error) throw new Error(error.message);
 }
 
 export async function listRegistrations(): Promise<RegistrationRow[]> {

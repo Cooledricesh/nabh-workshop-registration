@@ -1,6 +1,6 @@
-import type { ParticipantDraft, SessionSlot, WorkshopAvailability } from './types';
+import type { ParticipantDraft, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from './types';
 
-export type { ParticipantDraft, SessionSlot, WorkshopAvailability } from './types';
+export type { ParticipantDraft, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from './types';
 
 export class RegistrationValidationError extends Error {
   constructor(message: string) {
@@ -14,6 +14,18 @@ export type BatchValidationResult = {
   participants: ParticipantDraft[];
   demandByWorkshop: Map<string, number>;
 };
+
+export function validateRepresentativeCredentials(input: RepresentativeCredentials): RepresentativeCredentials {
+  const name = input.name.trim();
+  const password = input.password.trim();
+  if (!name) {
+    throw new RegistrationValidationError('대표자 이름을 입력해 주세요.');
+  }
+  if (!password) {
+    throw new RegistrationValidationError('조회용 비밀번호를 입력해 주세요.');
+  }
+  return { name, password };
+}
 
 export function summarizeWorkshopDemand(participants: ParticipantDraft[]): Map<string, number> {
   const demand = new Map<string, number>();
@@ -48,10 +60,6 @@ export function validateBatchRegistration(
     if (!participant.position.trim()) {
       throw new RegistrationValidationError(`${rowLabel}: 직책을 입력해 주세요.`);
     }
-    if (!participant.password.trim()) {
-      throw new RegistrationValidationError(`${rowLabel}: 조회용 비밀번호를 입력해 주세요.`);
-    }
-
     const selectedSlots = new Map<SessionSlot, string>();
     const uniqueWorkshopIds = new Set(participant.workshopIds.filter(Boolean));
 
