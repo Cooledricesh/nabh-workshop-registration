@@ -13,6 +13,17 @@ const afternoonWorkshops = [
   '슐렌(참사랑병원)',
 ];
 
+
+const institutionLinks = [
+  { name: '이음병원', url: 'http://www.eumhospital.co.kr/', logo: '/institutions/institution-1.png' },
+  { name: '대동병원', url: 'http://www.ddhosp.com/', logo: '/institutions/institution-2.png' },
+  { name: '다움병원', url: 'http://daumhospital.co.kr/' },
+  { name: '천주의성요한병원', url: 'http://www.yohanhos.or.kr/' },
+  { name: '참사랑병원', url: 'http://www.clh.co.kr/' },
+  { name: '아주대학교병원 정신건강의학과', url: 'https://hosp.ajoumc.or.kr/dept/deptView.do?deptNo=22&deptCd=PSY', logo: '/institutions/institution-6.png' },
+  { name: '국립정신건강센터', url: 'https://www.ncmh.go.kr/', logo: '/institutions/institution-7.jpg' },
+];
+
 const schedule = [
   { time: '09:30', title: '집결', detail: '6층 강당', type: 'opening' },
   { time: '09:40', title: '은하수 합창단', detail: '6층 강당', type: 'opening' },
@@ -92,6 +103,36 @@ export default function SymposiumPage() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="card institutions-card">
+        <div className="section-title">
+          <p className="muted">Participating Institutions</p>
+          <h2>참여 기관</h2>
+        </div>
+        <div className="institution-grid">
+          {institutionLinks.map((institution) => (
+            <a
+              key={institution.name}
+              className="institution-card"
+              href={institution.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div className="institution-logo-box" aria-hidden="true">
+                {institution.logo ? (
+                  <img src={institution.logo} alt="" />
+                ) : (
+                  <span>{institution.name.slice(0, 1)}</span>
+                )}
+              </div>
+              <div>
+                <strong>{institution.name}</strong>
+                <p className="muted">기관 홈페이지 바로가기</p>
+              </div>
+            </a>
+          ))}
         </div>
       </section>
     </main>

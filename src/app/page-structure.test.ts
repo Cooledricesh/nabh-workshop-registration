@@ -53,6 +53,14 @@ describe('public page structure and copy', () => {
       '음악치료의 이해(이음병원)',
       '행복한 미술(다움병원)',
       '슐렌(참사랑병원)',
+      '참여 기관',
+      '이음병원',
+      '대동병원',
+      '다움병원',
+      '천주의성요한병원',
+      '참사랑병원',
+      '아주대학교병원 정신건강의학과',
+      '국립정신건강센터',
     ]) {
       expect(rootPage).toContain(text);
     }
@@ -74,6 +82,8 @@ describe('public page structure and copy', () => {
     expect(registrationForm).toContain('조회용 비밀번호');
     expect(rootPage).toContain('/admin');
     expect(rootPage).toContain('/lookup');
+    expect(rootPage).toContain('http://www.eumhospital.co.kr/');
+    expect(rootPage).toContain('https://www.ncmh.go.kr/');
     expect(lookupPageExists).toBe(true);
     expect(schema).toContain('password text not null');
     expect(schema).toContain('find_registrations_by_name_password');

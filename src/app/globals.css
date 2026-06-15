@@ -54,6 +54,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .workshop-list { display: grid; gap: 12px; }
 .workshop-summary { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fbfcfa; }
 .workshop-summary span { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: white; font-weight: 800; flex: 0 0 auto; }
+.institutions-card { margin-top: 18px; }
+.institution-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.institution-card { display: flex; align-items: center; gap: 14px; min-height: 96px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: #fbfcfa; text-decoration: none; color: var(--ink); transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease; }
+.institution-card:hover { transform: translateY(-2px); border-color: rgba(20, 92, 63, 0.35); box-shadow: 0 10px 24px rgba(20, 92, 63, 0.10); }
+.institution-card strong { display: block; line-height: 1.35; }
+.institution-logo-box { display: grid; place-items: center; width: 76px; height: 58px; flex: 0 0 76px; border-radius: 14px; background: white; border: 1px solid #edf1ed; overflow: hidden; }
+.institution-logo-box img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; padding: 6px; }
+.institution-logo-box span { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: #e8f4ed; color: var(--accent); font-weight: 900; }
 .muted { color: var(--muted); font-size: 14px; }
 .error { color: var(--danger); font-weight: 700; }
 .success { color: var(--accent); font-weight: 700; }
