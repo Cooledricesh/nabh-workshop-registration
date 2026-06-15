@@ -386,3 +386,5 @@ on conflict (id) do update set
   slot = excluded.slot,
   capacity = excluded.capacity,
   is_open = excluded.is_open;
+
+notify pgrst, 'reload schema';
