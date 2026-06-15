@@ -108,6 +108,10 @@ describe('public page structure and copy', () => {
     expect(lookupForm).toContain('useEffect');
     expect(lookupForm).toContain('selectedWorkshopIds');
     expect(lookupForm).toContain('삭제하기');
+    expect(lookupForm).toContain('workshopClosedLabel');
+    expect(lookupForm).not.toContain('getWorkshopCapacityNotice');
+    expect(lookupForm).not.toContain('마감 임박');
+    expect(lookupForm).not.toContain('잔여 ${');
     expect(lookupPageExists).toBe(true);
     expect(schema).toContain('create table if not exists public.registration_groups');
     expect(schema).toContain('group_id uuid');

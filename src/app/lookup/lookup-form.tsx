@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
-import { getWorkshopCapacityNotice, isWorkshopSelectable } from '@/lib/registration';
+import { isWorkshopSelectable } from '@/lib/registration';
 import type { RegistrationLookupResult, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from '@/lib/types';
 import { lookupRegistrationAction, type LookupState } from '../actions';
 
@@ -15,6 +15,10 @@ function selectedWorkshopId(registration: RegistrationLookupResult, slot: Sessio
 
 function slotLabel(slot: SessionSlot) {
   return slot === 'morning' ? '오전 워크숍' : '오후 워크숍';
+}
+
+function workshopClosedLabel(workshop: WorkshopAvailability) {
+  return isWorkshopSelectable(workshop) ? workshop.title : `${workshop.title} · 마감`;
 }
 
 function WorkshopSelect({
@@ -35,12 +39,10 @@ function WorkshopSelect({
       <select value={selectedWorkshopId} onChange={(event) => onChange(event.target.value)}>
         <option value="">선택 안 함</option>
         {slotWorkshops.map((workshop) => {
-          const isCurrent = workshop.id === selectedWorkshopId;
-          const selectable = isCurrent || isWorkshopSelectable(workshop);
-          const capacityNotice = getWorkshopCapacityNotice(workshop);
+          const selectable = isWorkshopSelectable(workshop);
           return (
             <option key={workshop.id} value={workshop.id} disabled={!selectable}>
-              {capacityNotice ? `${workshop.title} · ${capacityNotice}` : workshop.title}
+              {workshopClosedLabel(workshop)}
             </option>
           );
         })}
