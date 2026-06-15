@@ -54,6 +54,8 @@ describe('public page structure and copy', () => {
       '행복한 미술(다움병원)',
       '슐렌(참사랑병원)',
       '참여 기관',
+      '한국정신사회재활협회',
+      '주관기관',
       '이음병원',
       '대동병원',
       '다움병원',
@@ -90,6 +92,11 @@ describe('public page structure and copy', () => {
     expect(rootPage).toContain('/lookup');
     expect(rootPage).toContain('http://www.eumhospital.co.kr/');
     expect(rootPage).toContain('https://www.ncmh.go.kr/');
+    expect(rootPage).toContain('http://www.kapr.or.kr/');
+    expect(rootPage).toContain('/institutions/kapr-logo.jpg');
+    expect(rootPage).toContain('/institutions/daum-logo.jpg');
+    expect(rootPage).toContain('/institutions/yohan-logo.jpg');
+    expect(rootPage).toContain('/institutions/chamsarang-logo.jpg');
     expect(lookupPageExists).toBe(true);
     expect(schema).toContain('create table if not exists public.registration_groups');
     expect(schema).toContain('group_id uuid');

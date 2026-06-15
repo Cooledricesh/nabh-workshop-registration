@@ -15,11 +15,12 @@ const afternoonWorkshops = [
 
 
 const institutionLinks = [
+  { name: '한국정신사회재활협회', url: 'http://www.kapr.or.kr/', logo: '/institutions/kapr-logo.jpg', note: '주관기관' },
   { name: '이음병원', url: 'http://www.eumhospital.co.kr/', logo: '/institutions/institution-1.png' },
   { name: '대동병원', url: 'http://www.ddhosp.com/', logo: '/institutions/institution-2.png' },
-  { name: '다움병원', url: 'http://daumhospital.co.kr/' },
-  { name: '천주의성요한병원', url: 'http://www.yohanhos.or.kr/' },
-  { name: '참사랑병원', url: 'http://www.clh.co.kr/' },
+  { name: '다움병원', url: 'http://daumhospital.co.kr/', logo: '/institutions/daum-logo.jpg' },
+  { name: '천주의성요한병원', url: 'http://www.yohanhos.or.kr/', logo: '/institutions/yohan-logo.jpg' },
+  { name: '참사랑병원', url: 'http://www.clh.co.kr/', logo: '/institutions/chamsarang-logo.jpg' },
   { name: '아주대학교병원 정신건강의학과', url: 'https://hosp.ajoumc.or.kr/dept/deptView.do?deptNo=22&deptCd=PSY', logo: '/institutions/institution-6.png' },
   { name: '국립정신건강센터', url: 'https://www.ncmh.go.kr/', logo: '/institutions/institution-7.jpg' },
 ];
@@ -129,7 +130,7 @@ export default function SymposiumPage() {
               </div>
               <div>
                 <strong>{institution.name}</strong>
-                <p className="muted">기관 홈페이지 바로가기</p>
+                <p className="muted">{institution.note ?? '기관 홈페이지 바로가기'}</p>
               </div>
             </a>
           ))}
