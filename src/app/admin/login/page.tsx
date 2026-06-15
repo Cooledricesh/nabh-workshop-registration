@@ -12,7 +12,7 @@ export default async function AdminLoginPage() {
     <main>
       <div className="card">
         <h1>관리자 로그인</h1>
-        <p className="muted">기본 비밀번호는 54321입니다. 배포 시 ADMIN_PASSWORD 환경변수로 변경할 수 있습니다.</p>
+        <p className="muted">관리자에게 전달받은 비밀번호를 입력해주세요.</p>
         <LoginForm action={loginAdmin} />
       </div>
     </main>
