@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import { isAdminAuthenticated } from '@/lib/admin-auth';
-import { listRegistrations, listWorkshops } from '@/lib/data';
+import { listRegistrations, listRegistrationsByWorkshop, listWorkshops } from '@/lib/data';
 import { createWorkshopAction, deleteWorkshopAction, logoutAdmin, updateWorkshopAction } from '../actions';
 
 export default async function AdminPage() {
@@ -10,7 +10,11 @@ export default async function AdminPage() {
     redirect('/admin/login');
   }
 
-  const [workshops, registrations] = await Promise.all([listWorkshops(), listRegistrations()]);
+  const [workshops, registrations, registrationsByWorkshop] = await Promise.all([
+    listWorkshops(),
+    listRegistrations(),
+    listRegistrationsByWorkshop(),
+  ]);
 
   return (
     <main>
@@ -57,28 +61,68 @@ export default async function AdminPage() {
 
       <section className="card">
         <h2>등록자 목록</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>등록시각</th>
-              <th>이름</th>
-              <th>소속</th>
-              <th>직책</th>
-              <th>워크숍</th>
-            </tr>
-          </thead>
-          <tbody>
-            {registrations.map((registration) => (
-              <tr key={registration.id}>
-                <td>{new Date(registration.createdAt).toLocaleString('ko-KR')}</td>
-                <td>{registration.name}</td>
-                <td>{registration.affiliation}</td>
-                <td>{registration.position}</td>
-                <td>{registration.workshops.length ? registration.workshops.map((workshop) => `${workshop.slot === 'morning' ? '오전' : '오후'} ${workshop.title}`).join(', ') : '선택 없음'}</td>
+        {registrations.length ? (
+          <table>
+            <thead>
+              <tr>
+                <th>등록시각</th>
+                <th>이름</th>
+                <th>소속</th>
+                <th>직책</th>
+                <th>워크숍</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {registrations.map((registration) => (
+                <tr key={registration.id}>
+                  <td>{new Date(registration.createdAt).toLocaleString('ko-KR')}</td>
+                  <td>{registration.name}</td>
+                  <td>{registration.affiliation}</td>
+                  <td>{registration.position}</td>
+                  <td>{registration.workshops.length ? registration.workshops.map((workshop) => `${workshop.slot === 'morning' ? '오전' : '오후'} ${workshop.title}`).join(', ') : '선택 없음'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : <p className="muted">아직 등록자가 없습니다.</p>}
+      </section>
+
+      <section className="card">
+        <h2>워크숍별 신청자</h2>
+        <div className="workshop-roster-list">
+          {registrationsByWorkshop.map((workshop) => (
+            <article key={workshop.workshopId} className="workshop-roster-card">
+              <div className="participant-heading">
+                <div>
+                  <h3>{workshop.slot === 'morning' ? '오전' : '오후'} · {workshop.title}</h3>
+                  <p className="muted">신청 {workshop.registrationCount}명 / 정원 {workshop.capacity}명</p>
+                </div>
+              </div>
+              {workshop.registrants.length ? (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>이름</th>
+                      <th>소속</th>
+                      <th>직책</th>
+                      <th>등록시각</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {workshop.registrants.map((registrant) => (
+                      <tr key={registrant.id}>
+                        <td>{registrant.name}</td>
+                        <td>{registrant.affiliation}</td>
+                        <td>{registrant.position}</td>
+                        <td>{new Date(registrant.createdAt).toLocaleString('ko-KR')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : <p className="muted">신청자가 없습니다.</p>}
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );

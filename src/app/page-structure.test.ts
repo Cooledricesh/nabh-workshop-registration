@@ -37,6 +37,8 @@ describe('public page structure and copy', () => {
     const schema = read('schema.sql');
     const registrationForm = read('src/app/registration-form.tsx');
     const lookupForm = read('src/app/lookup/lookup-form.tsx');
+    const adminPage = read('src/app/admin/page.tsx');
+    const dataLayer = read('src/lib/data.ts');
     const lookupPageExists = existsSync(join(appDir, 'lookup', 'page.tsx'));
 
     for (const text of [
@@ -107,6 +109,9 @@ describe('public page structure and copy', () => {
     expect(schema).toContain('find_registrations_by_name_password');
     expect(schema).toContain('update_registration_workshops');
     expect(schema).toContain('delete_registration');
+    expect(adminPage).toContain('워크숍별 신청자');
+    expect(adminPage).toContain('registrationsByWorkshop');
+    expect(dataLayer).toContain('listRegistrationsByWorkshop');
     expect(schema).toContain("'Quality Rights(아주대)', 'morning', 25");
     expect(schema).toContain("'슐렌(참사랑병원)', 'afternoon', 25");
   });

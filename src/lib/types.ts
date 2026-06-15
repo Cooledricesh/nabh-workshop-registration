@@ -30,6 +30,23 @@ export type RegistrationRow = {
   workshops: { id: string; title: string; slot: SessionSlot }[];
 };
 
+export type WorkshopRegistrant = {
+  id: string;
+  createdAt: string;
+  name: string;
+  affiliation: string;
+  position: string;
+};
+
+export type WorkshopRegistrationGroup = {
+  workshopId: string;
+  title: string;
+  slot: SessionSlot;
+  capacity: number;
+  registrationCount: number;
+  registrants: WorkshopRegistrant[];
+};
+
 export type RegistrationLookupResult = RegistrationRow & {
   groupId: string;
   passwordMatched: true;

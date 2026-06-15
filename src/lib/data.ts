@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { RegistrationLookupResult, RegistrationRow, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from './types';
+import type { RegistrationLookupResult, RegistrationRow, RepresentativeCredentials, SessionSlot, WorkshopAvailability, WorkshopRegistrant, WorkshopRegistrationGroup } from './types';
 import { getSupabaseServerClient } from './supabase';
 
 type WorkshopRow = {
@@ -12,17 +12,22 @@ type WorkshopRow = {
   registration_count?: number;
 };
 
-type RegistrationWorkshopRow = {
-  workshops: { id: string; title: string; slot: SessionSlot } | { id: string; title: string; slot: SessionSlot }[] | null;
-};
-
 type RegistrationDataRow = {
   id: string;
   created_at: string;
   name: string;
   affiliation: string;
   position: string;
-  registration_workshops: RegistrationWorkshopRow[] | null;
+  workshops: { id: string; title: string; slot: SessionSlot }[] | null;
+};
+
+type WorkshopRegistrantsRow = {
+  workshop_id: string;
+  title: string;
+  slot: SessionSlot;
+  capacity: number;
+  registration_count: number;
+  registrants: WorkshopRegistrant[] | null;
 };
 
 type RegistrationLookupRow = {
@@ -146,10 +151,7 @@ export async function deleteRegistration(input: RepresentativeCredentials & { re
 
 export async function listRegistrations(): Promise<RegistrationRow[]> {
   const supabase = getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from('registrations')
-    .select('id,created_at,name,affiliation,position,registration_workshops(workshops(id,title,slot))')
-    .order('created_at', { ascending: false });
+  const { data, error } = await supabase.rpc('list_admin_registrations');
 
   if (error) throw new Error(error.message);
 
@@ -159,8 +161,28 @@ export async function listRegistrations(): Promise<RegistrationRow[]> {
     name: row.name,
     affiliation: row.affiliation,
     position: row.position,
-    workshops: (row.registration_workshops ?? [])
-      .flatMap((entry) => (Array.isArray(entry.workshops) ? entry.workshops : entry.workshops ? [entry.workshops] : []))
-      .map((workshop) => ({ id: workshop.id, title: workshop.title, slot: workshop.slot })),
+    workshops: normalizeWorkshops(row.workshops),
+  }));
+}
+
+export async function listRegistrationsByWorkshop(): Promise<WorkshopRegistrationGroup[]> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase.rpc('list_admin_workshop_registrants');
+
+  if (error) throw new Error(error.message);
+
+  return (data as WorkshopRegistrantsRow[]).map((row) => ({
+    workshopId: row.workshop_id,
+    title: row.title,
+    slot: row.slot,
+    capacity: row.capacity,
+    registrationCount: row.registration_count,
+    registrants: (row.registrants ?? []).map((registrant) => ({
+      id: registrant.id,
+      createdAt: registrant.createdAt,
+      name: registrant.name,
+      affiliation: registrant.affiliation,
+      position: registrant.position,
+    })),
   }));
 }
