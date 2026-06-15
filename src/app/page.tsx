@@ -10,7 +10,7 @@ const afternoonWorkshops = [
   'V-cat(대동병원)',
   '음악치료의 이해(이음병원)',
   '행복한 미술(다움병원)',
-  '숲길(참사랑병원)',
+  '슐렌(참사랑병원)',
 ];
 
 const schedule = [

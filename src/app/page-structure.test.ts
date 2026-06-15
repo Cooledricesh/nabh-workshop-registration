@@ -52,7 +52,7 @@ describe('public page structure and copy', () => {
       'V-cat(대동병원)',
       '음악치료의 이해(이음병원)',
       '행복한 미술(다움병원)',
-      '숲길(참사랑병원)',
+      '슐렌(참사랑병원)',
     ]) {
       expect(rootPage).toContain(text);
     }
@@ -64,7 +64,7 @@ describe('public page structure and copy', () => {
       'V-cat(대동병원)',
       '음악치료의 이해(이음병원)',
       '행복한 미술(다움병원)',
-      '숲길(참사랑병원)',
+      '슐렌(참사랑병원)',
     ]) {
       expect(schema).toContain(title);
     }
@@ -78,6 +78,6 @@ describe('public page structure and copy', () => {
     expect(schema).toContain('password text not null');
     expect(schema).toContain('find_registrations_by_name_password');
     expect(schema).toContain("'Quality Rights(아주대)', 'morning', 25");
-    expect(schema).toContain("'숲길(참사랑병원)', 'afternoon', 25");
+    expect(schema).toContain("'슐렌(참사랑병원)', 'afternoon', 25");
   });
 });
