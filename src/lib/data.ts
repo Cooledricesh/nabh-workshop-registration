@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { RegistrationRow, SessionSlot, WorkshopAvailability } from './types';
+import type { RegistrationLookupResult, RegistrationRow, SessionSlot, WorkshopAvailability } from './types';
 import { getSupabaseServerClient } from './supabase';
 
 type WorkshopRow = {
@@ -25,6 +25,15 @@ type RegistrationDataRow = {
   registration_workshops: RegistrationWorkshopRow[] | null;
 };
 
+type RegistrationLookupRow = {
+  id: string;
+  created_at: string;
+  name: string;
+  affiliation: string;
+  position: string;
+  workshops: { id: string; title: string; slot: SessionSlot }[] | null;
+};
+
 function toAvailability(row: WorkshopRow): WorkshopAvailability {
   return {
     id: row.id,
@@ -34,6 +43,10 @@ function toAvailability(row: WorkshopRow): WorkshopAvailability {
     registeredCount: row.registration_count ?? 0,
     isOpen: row.is_open,
   };
+}
+
+function normalizeWorkshops(workshops: { id: string; title: string; slot: SessionSlot }[] | null | undefined) {
+  return (workshops ?? []).map((workshop) => ({ id: workshop.id, title: workshop.title, slot: workshop.slot }));
 }
 
 export async function listWorkshops(): Promise<WorkshopAvailability[]> {
@@ -82,6 +95,26 @@ export async function registerParticipants(participants: unknown) {
 
   if (error) throw new Error(error.message);
   return data as { registration_ids: string[] };
+}
+
+export async function lookupRegistrations(input: { name: string; password: string }): Promise<RegistrationLookupResult[]> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase.rpc('find_registrations_by_name_password', {
+    lookup_name: input.name,
+    lookup_password: input.password,
+  });
+
+  if (error) throw new Error(error.message);
+
+  return (data as RegistrationLookupRow[]).map((row) => ({
+    id: row.id,
+    createdAt: row.created_at,
+    name: row.name,
+    affiliation: row.affiliation,
+    position: row.position,
+    workshops: normalizeWorkshops(row.workshops),
+    passwordMatched: true,
+  }));
 }
 
 export async function listRegistrations(): Promise<RegistrationRow[]> {

@@ -30,7 +30,7 @@ export default async function AdminPage() {
             <option value="morning">오전</option>
             <option value="afternoon">오후</option>
           </select>
-          <input name="capacity" type="number" min="0" defaultValue="30" required />
+          <input name="capacity" type="number" min="0" defaultValue="25" required />
           <label><input name="isOpen" type="checkbox" defaultChecked /> 공개</label>
           <button type="submit">추가</button>
         </form>

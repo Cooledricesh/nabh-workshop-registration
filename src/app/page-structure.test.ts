@@ -36,6 +36,7 @@ describe('public page structure and copy', () => {
     const rootPage = read('src/app/page.tsx');
     const schema = read('schema.sql');
     const registrationForm = read('src/app/registration-form.tsx');
+    const lookupPageExists = existsSync(join(appDir, 'lookup', 'page.tsx'));
 
     for (const text of [
       '09:30',
@@ -70,5 +71,13 @@ describe('public page structure and copy', () => {
 
     expect(registrationForm).toContain('오전 워크숍');
     expect(registrationForm).toContain('오후 워크숍');
+    expect(registrationForm).toContain('조회용 비밀번호');
+    expect(rootPage).toContain('/admin');
+    expect(rootPage).toContain('/lookup');
+    expect(lookupPageExists).toBe(true);
+    expect(schema).toContain('password text not null');
+    expect(schema).toContain('find_registrations_by_name_password');
+    expect(schema).toContain("'Quality Rights(아주대)', 'morning', 25");
+    expect(schema).toContain("'숲길(참사랑병원)', 'afternoon', 25");
   });
 });

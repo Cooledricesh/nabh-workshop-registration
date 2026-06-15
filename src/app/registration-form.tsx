@@ -12,6 +12,7 @@ const initialRow = (): ParticipantFormRow => ({
   name: '',
   affiliation: '',
   position: '',
+  password: '',
   workshopIds: [],
 });
 
@@ -76,6 +77,7 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
     name: row.name,
     affiliation: row.affiliation,
     position: row.position,
+    password: row.password,
     workshopIds: row.workshopIds,
   }));
 
@@ -109,6 +111,15 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
               <input
                 value={row.position}
                 onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, position: event.target.value } : item))}
+                required
+              />
+            </div>
+            <div>
+              <label>조회용 비밀번호</label>
+              <input
+                type="password"
+                value={row.password}
+                onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, password: event.target.value } : item))}
                 required
               />
             </div>

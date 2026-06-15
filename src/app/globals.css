@@ -16,7 +16,7 @@ main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 40px 0; 
 .header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 24px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: 0 10px 30px rgba(20, 92, 63, 0.08); margin-bottom: 18px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+.row { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 10px; align-items: end; margin-bottom: 10px; }
 .workshop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
 .workshop-option { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 4px; }
 .workshop-option.disabled { opacity: 0.55; background: #f3f3f0; }
@@ -27,16 +27,30 @@ button.secondary, .button.secondary-link { background: #5d675f; }
 button.danger { background: var(--danger); }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
 .hero { padding: 40px; }
+.compact-hero { background: linear-gradient(135deg, #f1fbf5, #ffffff); border: 1px solid var(--line); border-radius: 24px; display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; margin-bottom: 18px; box-shadow: 0 14px 40px rgba(20, 92, 63, 0.10); }
 .eyebrow { color: var(--accent); font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
 .lead { max-width: 760px; font-size: 18px; line-height: 1.7; }
+.lead.short { margin-bottom: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .actions.compact { margin-top: 0; }
 .section-title { margin-bottom: 18px; }
-.section-title h2, .timeline-item h3 { margin: 0; }
+.section-title h2, .timeline-item h3, .agenda-row h3 { margin: 0; }
+.agenda-card { padding: 0; overflow: hidden; }
+.agenda-card .section-title { padding: 24px 24px 0; }
+.agenda-table { display: grid; }
+.agenda-row { display: grid; grid-template-columns: 150px 1fr; gap: 18px; padding: 18px 24px; border-top: 1px solid var(--line); background: white; }
+.agenda-row time { color: var(--accent); font-weight: 900; }
+.agenda-row h3 { font-size: 17px; }
+.agenda-row p { margin: 6px 0 0; color: var(--muted); }
+.agenda-row.workshop { background: #f3faf6; }
+.agenda-row.lecture { background: #fff9ed; }
+.agenda-row.meal { background: #f8f6f0; }
 .timeline { display: grid; gap: 12px; }
 .timeline-item { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcfa; }
 .timeline-item time { color: var(--accent); font-weight: 800; }
 .timeline-item p { margin: 6px 0 0; color: var(--muted); }
+.lookup-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+.lookup-results { display: grid; gap: 12px; margin-top: 16px; }
 .workshop-list { display: grid; gap: 12px; }
 .workshop-summary { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fbfcfa; }
 .workshop-summary span { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: white; font-weight: 800; flex: 0 0 auto; }
@@ -48,7 +62,7 @@ th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; 
 .inline-form { display: inline; }
 .admin-workshop { display: grid; grid-template-columns: 2fr 120px 110px 100px auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
 @media (max-width: 760px) {
-  .row, .admin-workshop, .timeline-item { grid-template-columns: 1fr; }
-  .header { align-items: flex-start; flex-direction: column; }
+  .row, .admin-workshop, .timeline-item, .agenda-row, .lookup-form { grid-template-columns: 1fr; }
+  .header, .compact-hero { align-items: flex-start; flex-direction: column; }
   .hero { padding: 24px; }
 }

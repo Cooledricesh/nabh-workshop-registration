@@ -3,11 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { clearAdminSession, isAdminAuthenticated, setAdminSession, verifyAdminPassword } from '@/lib/admin-auth';
-import { createWorkshop, deleteWorkshop, registerParticipants, updateWorkshop } from '@/lib/data';
+import { createWorkshop, deleteWorkshop, lookupRegistrations, registerParticipants, updateWorkshop } from '@/lib/data';
 import { validateBatchRegistration } from '@/lib/registration';
-import type { ParticipantDraft, SessionSlot, WorkshopAvailability } from '@/lib/types';
+import type { ParticipantDraft, RegistrationLookupResult, SessionSlot, WorkshopAvailability } from '@/lib/types';
 
 export type ActionState = { ok: boolean; message: string };
+export type LookupState = ActionState & { results: RegistrationLookupResult[] };
 
 function parseParticipants(raw: FormDataEntryValue | null): ParticipantDraft[] {
   if (typeof raw !== 'string') {
@@ -18,6 +19,7 @@ function parseParticipants(raw: FormDataEntryValue | null): ParticipantDraft[] {
     name: participant.name.trim(),
     affiliation: participant.affiliation.trim(),
     position: participant.position.trim(),
+    password: participant.password.trim(),
     workshopIds: Array.from(new Set(participant.workshopIds.filter(Boolean))),
   }));
 }
@@ -40,6 +42,23 @@ export async function submitRegistration(_prev: ActionState, formData: FormData)
     return { ok: true, message: `${participants.length}명 등록이 완료되었습니다.` };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : '등록에 실패했습니다.' };
+  }
+}
+
+export async function lookupRegistrationAction(_prev: LookupState, formData: FormData): Promise<LookupState> {
+  try {
+    const name = String(formData.get('name') ?? '').trim();
+    const password = String(formData.get('password') ?? '').trim();
+    if (!name || !password) {
+      return { ok: false, message: '이름과 비밀번호를 모두 입력해 주세요.', results: [] };
+    }
+    const results = await lookupRegistrations({ name, password });
+    if (results.length === 0) {
+      return { ok: false, message: '일치하는 등록 내역이 없습니다.', results: [] };
+    }
+    return { ok: true, message: `${results.length}건의 등록 내역을 찾았습니다.`, results };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : '등록 내역 조회에 실패했습니다.', results: [] };
   }
 }
 
@@ -77,7 +96,7 @@ async function assertAdminAction() {
 export async function createWorkshopAction(formData: FormData) {
   await assertAdminAction();
   await createWorkshop(parseWorkshopForm(formData));
-  revalidatePath('/');
+  revalidatePath('/workshops');
   revalidatePath('/admin');
 }
 
@@ -85,7 +104,7 @@ export async function updateWorkshopAction(formData: FormData) {
   await assertAdminAction();
   const id = String(formData.get('id') ?? '');
   await updateWorkshop({ id, ...parseWorkshopForm(formData) });
-  revalidatePath('/');
+  revalidatePath('/workshops');
   revalidatePath('/admin');
 }
 
@@ -93,6 +112,6 @@ export async function deleteWorkshopAction(formData: FormData) {
   await assertAdminAction();
   const id = String(formData.get('id') ?? '');
   await deleteWorkshop(id);
-  revalidatePath('/');
+  revalidatePath('/workshops');
   revalidatePath('/admin');
 }

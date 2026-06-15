@@ -6,6 +6,7 @@
 
 - `/` — 심포지엄 일정표
 - `/workshops` — 참가자/워크숍 등록
+- `/lookup` — 이름+조회용 비밀번호로 내 등록 확인
 - `/admin` — 기존 관리 화면(현재 MVP에서는 필수 사용 아님)
 
 ## 고정 일정
@@ -34,7 +35,7 @@
 - 행복한 미술(다움병원)
 - 숲길(참사랑병원)
 
-기본 정원은 워크숍별 30명입니다. 변경하려면 `schema.sql`의 seed capacity 값을 수정한 뒤 Supabase SQL Editor에서 다시 실행하면 됩니다.
+기본 정원은 워크숍별 25명입니다. 변경하려면 `schema.sql`의 seed capacity 값을 수정한 뒤 Supabase SQL Editor에서 다시 실행하면 됩니다.
 
 ## Supabase 설정
 

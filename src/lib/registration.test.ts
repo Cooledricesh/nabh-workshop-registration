@@ -8,17 +8,18 @@ import {
 } from './registration';
 
 const workshops: WorkshopAvailability[] = [
-  { id: 'm1', title: 'Morning A', slot: 'morning', capacity: 2, registeredCount: 0, isOpen: true },
-  { id: 'm2', title: 'Morning B', slot: 'morning', capacity: 10, registeredCount: 0, isOpen: true },
-  { id: 'a1', title: 'Afternoon A', slot: 'afternoon', capacity: 1, registeredCount: 0, isOpen: true },
-  { id: 'a2', title: 'Afternoon B', slot: 'afternoon', capacity: 10, registeredCount: 10, isOpen: true },
-  { id: 'm3', title: 'Closed Morning', slot: 'morning', capacity: 10, registeredCount: 0, isOpen: false },
+  { id: 'm1', title: 'Morning A', slot: 'morning', capacity: 25, registeredCount: 23, isOpen: true },
+  { id: 'm2', title: 'Morning B', slot: 'morning', capacity: 25, registeredCount: 0, isOpen: true },
+  { id: 'a1', title: 'Afternoon A', slot: 'afternoon', capacity: 25, registeredCount: 24, isOpen: true },
+  { id: 'a2', title: 'Afternoon B', slot: 'afternoon', capacity: 25, registeredCount: 25, isOpen: true },
+  { id: 'm3', title: 'Closed Morning', slot: 'morning', capacity: 25, registeredCount: 0, isOpen: false },
 ];
 
 const baseParticipant: ParticipantDraft = {
   name: '홍길동',
   affiliation: '낮병원',
   position: '전문의',
+  password: '1234',
   workshopIds: [],
 };
 

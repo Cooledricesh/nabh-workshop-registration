@@ -48,6 +48,9 @@ export function validateBatchRegistration(
     if (!participant.position.trim()) {
       throw new RegistrationValidationError(`${rowLabel}: 직책을 입력해 주세요.`);
     }
+    if (!participant.password.trim()) {
+      throw new RegistrationValidationError(`${rowLabel}: 조회용 비밀번호를 입력해 주세요.`);
+    }
 
     const selectedSlots = new Map<SessionSlot, string>();
     const uniqueWorkshopIds = new Set(participant.workshopIds.filter(Boolean));

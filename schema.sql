@@ -15,8 +15,11 @@ create table if not exists public.registrations (
   name text not null check (length(trim(name)) > 0),
   affiliation text not null check (length(trim(affiliation)) > 0),
   position text not null check (length(trim(position)) > 0),
+  password text not null default '',
   created_at timestamptz not null default now()
 );
+
+alter table public.registrations add column if not exists password text not null default '';
 
 create table if not exists public.registration_workshops (
   registration_id uuid not null references public.registrations(id) on delete cascade,
@@ -73,15 +76,17 @@ begin
     name text not null,
     affiliation text not null,
     position text not null,
+    password text not null,
     workshop_ids uuid[] not null
   ) on commit drop;
 
-  insert into tmp_participants (row_no, name, affiliation, position, workshop_ids)
+  insert into tmp_participants (row_no, name, affiliation, position, password, workshop_ids)
   select
     item.ordinality::integer,
     trim(item.value ->> 'name'),
     trim(item.value ->> 'affiliation'),
     trim(item.value ->> 'position'),
+    trim(item.value ->> 'password'),
     coalesce(array(
       select distinct value::uuid
       from jsonb_array_elements_text(coalesce(item.value -> 'workshopIds', '[]'::jsonb))
@@ -89,8 +94,8 @@ begin
     ), '{}')
   from jsonb_array_elements(participants_payload) with ordinality as item(value, ordinality);
 
-  if exists (select 1 from tmp_participants where name = '' or affiliation = '' or position = '') then
-    raise exception '이름, 소속, 직책은 모두 필수입니다.';
+  if exists (select 1 from tmp_participants where name = '' or affiliation = '' or position = '' or password = '') then
+    raise exception '이름, 소속, 직책, 조회용 비밀번호는 모두 필수입니다.';
   end if;
 
   perform 1
@@ -153,8 +158,8 @@ begin
   end if;
 
   for participant in select * from tmp_participants order by row_no loop
-    insert into public.registrations (name, affiliation, position)
-    values (participant.name, participant.affiliation, participant.position)
+    insert into public.registrations (name, affiliation, position, password)
+    values (participant.name, participant.affiliation, participant.position, participant.password)
     returning id into current_registration_id;
 
     inserted_ids := array_append(inserted_ids, current_registration_id);
@@ -166,6 +171,41 @@ begin
 
   return jsonb_build_object('registration_ids', inserted_ids);
 end;
+$$;
+
+create or replace function public.find_registrations_by_name_password(lookup_name text, lookup_password text)
+returns table (
+  id uuid,
+  created_at timestamptz,
+  name text,
+  affiliation text,
+  position text,
+  workshops jsonb
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    r.id,
+    r.created_at,
+    r.name,
+    r.affiliation,
+    r.position,
+    coalesce(
+      jsonb_agg(
+        jsonb_build_object('id', w.id, 'title', w.title, 'slot', w.slot)
+        order by w.slot desc, w.created_at asc
+      ) filter (where w.id is not null),
+      '[]'::jsonb
+    ) as workshops
+  from public.registrations r
+  left join public.registration_workshops rw on rw.registration_id = r.id
+  left join public.workshops w on w.id = rw.workshop_id
+  where r.name = trim(lookup_name)
+    and r.password = trim(lookup_password)
+  group by r.id
+  order by r.created_at desc;
 $$;
 
 alter table public.workshops enable row level security;
@@ -181,6 +221,7 @@ create policy "public can read workshop counts" on public.registration_workshops
 grant usage on schema public to anon, authenticated;
 grant select on public.workshops, public.workshops_with_counts to anon, authenticated;
 grant execute on function public.register_participants_batch(jsonb) to anon, authenticated;
+grant execute on function public.find_registrations_by_name_password(text, text) to anon, authenticated;
 
 delete from public.workshops
 where title in (
@@ -191,13 +232,13 @@ where title in (
 
 insert into public.workshops (id, title, slot, capacity, is_open)
 values
-  ('11111111-1111-4111-8111-111111111111', 'Quality Rights(아주대)', 'morning', 30, true),
-  ('22222222-2222-4222-8222-222222222222', 'Personal Medicine(대동병원)', 'morning', 30, true),
-  ('33333333-3333-4333-8333-333333333333', '미술치료의 이해(이음병원)', 'morning', 30, true),
-  ('44444444-4444-4444-8444-444444444444', 'V-cat(대동병원)', 'afternoon', 30, true),
-  ('55555555-5555-4555-8555-555555555555', '음악치료의 이해(이음병원)', 'afternoon', 30, true),
-  ('66666666-6666-4666-8666-666666666666', '행복한 미술(다움병원)', 'afternoon', 30, true),
-  ('77777777-7777-4777-8777-777777777777', '숲길(참사랑병원)', 'afternoon', 30, true)
+  ('11111111-1111-4111-8111-111111111111', 'Quality Rights(아주대)', 'morning', 25, true),
+  ('22222222-2222-4222-8222-222222222222', 'Personal Medicine(대동병원)', 'morning', 25, true),
+  ('33333333-3333-4333-8333-333333333333', '미술치료의 이해(이음병원)', 'morning', 25, true),
+  ('44444444-4444-4444-8444-444444444444', 'V-cat(대동병원)', 'afternoon', 25, true),
+  ('55555555-5555-4555-8555-555555555555', '음악치료의 이해(이음병원)', 'afternoon', 25, true),
+  ('66666666-6666-4666-8666-666666666666', '행복한 미술(다움병원)', 'afternoon', 25, true),
+  ('77777777-7777-4777-8777-777777777777', '숲길(참사랑병원)', 'afternoon', 25, true)
 on conflict (id) do update set
   title = excluded.title,
   slot = excluded.slot,
