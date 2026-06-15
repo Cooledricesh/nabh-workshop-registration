@@ -17,7 +17,7 @@ const workshops: WorkshopAvailability[] = [
 
 const baseParticipant: ParticipantDraft = {
   name: '홍길동',
-  affiliation: '나병원',
+  affiliation: '낮병원',
   position: '전문의',
   workshopIds: [],
 };

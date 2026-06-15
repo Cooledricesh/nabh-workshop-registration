@@ -23,9 +23,20 @@ main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 40px 0; 
 label { font-weight: 700; font-size: 14px; }
 input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: white; }
 button, .button { border: 0; border-radius: 10px; background: var(--accent); color: white; padding: 10px 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
-button.secondary { background: #5d675f; }
+button.secondary, .button.secondary-link { background: #5d675f; }
 button.danger { background: var(--danger); }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
+.hero { padding: 40px; }
+.eyebrow { color: var(--accent); font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.lead { max-width: 760px; font-size: 18px; line-height: 1.7; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.actions.compact { margin-top: 0; }
+.section-title { margin-bottom: 18px; }
+.section-title h2, .timeline-item h3 { margin: 0; }
+.timeline { display: grid; gap: 12px; }
+.timeline-item { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcfa; }
+.timeline-item time { color: var(--accent); font-weight: 800; }
+.timeline-item p { margin: 6px 0 0; color: var(--muted); }
 .muted { color: var(--muted); font-size: 14px; }
 .error { color: var(--danger); font-weight: 700; }
 .success { color: var(--accent); font-weight: 700; }
@@ -34,6 +45,7 @@ th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; 
 .inline-form { display: inline; }
 .admin-workshop { display: grid; grid-template-columns: 2fr 120px 110px 100px auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
 @media (max-width: 760px) {
-  .row, .admin-workshop { grid-template-columns: 1fr; }
+  .row, .admin-workshop, .timeline-item { grid-template-columns: 1fr; }
   .header { align-items: flex-start; flex-direction: column; }
+  .hero { padding: 24px; }
 }
