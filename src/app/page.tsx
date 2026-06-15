@@ -1,18 +1,27 @@
 import Link from 'next/link';
 
-const morningWorkshops = [
-  { title: 'Quality Rights(아주대)', time: '10:00–12:00', note: '2시간 진행' },
-  { title: 'Personal Medicine(대동병원)', time: '10:00–11:30', note: '90분 진행 · 이후 자유시간' },
-  { title: '미술치료의 이해(이음병원)', time: '10:00–11:30', note: '90분 진행 · 이후 자유시간' },
-];
+import { listWorkshops } from '@/lib/data';
+import { getWorkshopCapacityNotice } from '@/lib/registration';
+import type { SessionSlot, WorkshopAvailability } from '@/lib/types';
 
-const afternoonWorkshops = [
-  'V-cat(대동병원)',
-  '음악치료의 이해(이음병원)',
-  '행복한 미술(다움병원)',
-  '슐렌(참사랑병원)',
-];
+export const dynamic = 'force-dynamic';
 
+type WorkshopIntro = {
+  title: string;
+  time: string;
+  note: string;
+  slot: SessionSlot;
+};
+
+const workshopIntros: WorkshopIntro[] = [
+  { title: 'Quality Rights(아주대)', time: '10:00–12:00', note: '2시간 진행', slot: 'morning' },
+  { title: 'Personal Medicine(대동병원)', time: '10:00–11:30', note: '90분 진행 · 이후 30분간 자유시간', slot: 'morning' },
+  { title: '미술치료의 이해(이음병원)', time: '10:00–11:30', note: '90분 진행 · 이후 30분간 자유시간', slot: 'morning' },
+  { title: 'V-cat(대동병원)', time: '15:00–16:30', note: '90분 진행', slot: 'afternoon' },
+  { title: '음악치료의 이해(이음병원)', time: '15:00–16:30', note: '90분 진행', slot: 'afternoon' },
+  { title: '행복한 미술(다움병원)', time: '15:00–16:30', note: '90분 진행', slot: 'afternoon' },
+  { title: '슐렌(참사랑병원)', time: '15:00–16:30', note: '90분 진행', slot: 'afternoon' },
+];
 
 const institutionLinks = [
   { name: '한국정신사회재활협회', url: 'http://www.kapr.or.kr/', logo: '/institutions/kapr-logo.jpg', note: '주관기관' },
@@ -29,7 +38,7 @@ const schedule = [
   { time: '09:30', title: '집결', detail: '6층 강당', type: 'opening' },
   { time: '09:40', title: '은하수 합창단', detail: '6층 강당', type: 'opening' },
   { time: '09:50', title: '개회', detail: '낮병원 심포지엄 개회', type: 'opening' },
-  { time: '10:00–12:00', title: '오전 워크숍 3개 세션 동시 진행', detail: 'Quality Rights는 12시까지, 나머지 두 세션은 11시 30분 종료 후 자유시간', type: 'workshop' },
+  { time: '10:00–12:00', title: '오전 워크숍 3개 세션 동시 진행', detail: 'Quality Rights는 12시까지, 나머지 두 세션은 11시 30분 종료 후 30분간 자유시간', type: 'workshop' },
   { time: '12:00–13:00', title: '점심', detail: '8층 식당', type: 'meal' },
   { time: '13:00–14:00', title: '병원 라운딩', detail: '낮병원 현장 라운딩', type: 'tour' },
   { time: '14:00–15:00', title: '특강', detail: '대동병원 박상운 병원장 · 6층 강당', type: 'lecture' },
@@ -38,7 +47,43 @@ const schedule = [
   { time: '17:00–17:30', title: '식당 이동', detail: '동촌유원지-대돈가', type: 'meal' },
 ];
 
-export default function SymposiumPage() {
+function rootWorkshopCapacityNotice(workshop?: WorkshopAvailability) {
+  if (!workshop) return null;
+  return getWorkshopCapacityNotice(workshop);
+}
+
+function workshopWithAvailability(intro: WorkshopIntro, workshops: WorkshopAvailability[]) {
+  return {
+    ...intro,
+    availability: workshops.find((workshop) => workshop.title === intro.title),
+  };
+}
+
+function WorkshopSummaryCard({ intro, index }: { intro: WorkshopIntro & { availability?: WorkshopAvailability }; index: number }) {
+  const capacityNotice = rootWorkshopCapacityNotice(intro.availability);
+
+  return (
+    <article className="workshop-summary">
+      <span>{index + 1}</span>
+      <div>
+        <strong>{intro.title}</strong>
+        <p className="muted">{intro.time} · {intro.note}</p>
+        {intro.availability ? <p className="muted">최대 정원 {intro.availability.capacity}명</p> : null}
+        {capacityNotice ? <p className="capacity-warning workshop-capacity-modal" aria-label="마감 임박 또는 마감 안내">{capacityNotice}</p> : null}
+      </div>
+    </article>
+  );
+}
+
+export default async function SymposiumPage() {
+  const workshops = await listWorkshops();
+  const morningWorkshops = workshopIntros
+    .filter((workshop) => workshop.slot === 'morning')
+    .map((workshop) => workshopWithAvailability(workshop, workshops));
+  const afternoonWorkshops = workshopIntros
+    .filter((workshop) => workshop.slot === 'afternoon')
+    .map((workshop) => workshopWithAvailability(workshop, workshops));
+
   return (
     <main>
       <section className="hero compact-hero">
@@ -80,13 +125,7 @@ export default function SymposiumPage() {
           </div>
           <div className="workshop-list">
             {morningWorkshops.map((workshop, index) => (
-              <article key={workshop.title} className="workshop-summary">
-                <span>{index + 1}</span>
-                <div>
-                  <strong>{workshop.title}</strong>
-                  <p className="muted">{workshop.time} · {workshop.note}</p>
-                </div>
-              </article>
+              <WorkshopSummaryCard key={workshop.title} intro={workshop} index={index} />
             ))}
           </div>
         </div>
@@ -97,11 +136,8 @@ export default function SymposiumPage() {
             <h2>15:00–16:30 · 오후 4개 세션</h2>
           </div>
           <div className="workshop-list">
-            {afternoonWorkshops.map((title, index) => (
-              <article key={title} className="workshop-summary">
-                <span>{index + 1}</span>
-                <strong>{title}</strong>
-              </article>
+            {afternoonWorkshops.map((workshop, index) => (
+              <WorkshopSummaryCard key={workshop.title} intro={workshop} index={index} />
             ))}
           </div>
         </div>

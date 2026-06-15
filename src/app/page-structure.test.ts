@@ -98,6 +98,13 @@ describe('public page structure and copy', () => {
     expect(registrationForm).toContain('조회용 비밀번호');
     expect(rootPage).toContain('/admin');
     expect(rootPage).toContain('/lookup');
+    expect(rootPage).toContain("import { listWorkshops } from '@/lib/data'");
+    expect(rootPage).toContain('export const dynamic = \'force-dynamic\'');
+    expect(rootPage).toContain('최대 정원');
+    expect(rootPage).toContain('마감 임박');
+    expect(rootPage).toContain('rootWorkshopCapacityNotice');
+    expect(rootPage).toContain('이후 30분간 자유시간');
+    expect(rootPage).not.toContain('90분 진행 · 이후 자유시간');
     expect(rootPage).toContain('http://www.eumhospital.co.kr/');
     expect(rootPage).toContain('https://www.ncmh.go.kr/');
     expect(rootPage).toContain('http://www.kapr.or.kr/');
