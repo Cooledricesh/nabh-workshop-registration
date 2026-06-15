@@ -14,7 +14,7 @@ create table if not exists public.registrations (
   id uuid primary key default gen_random_uuid(),
   name text not null check (length(trim(name)) > 0),
   affiliation text not null check (length(trim(affiliation)) > 0),
-  position text not null check (length(trim(position)) > 0),
+  "position" text not null check (length(trim("position")) > 0),
   password text not null default '',
   created_at timestamptz not null default now()
 );
@@ -75,12 +75,12 @@ begin
     row_no integer primary key,
     name text not null,
     affiliation text not null,
-    position text not null,
+    "position" text not null,
     password text not null,
     workshop_ids uuid[] not null
   ) on commit drop;
 
-  insert into tmp_participants (row_no, name, affiliation, position, password, workshop_ids)
+  insert into tmp_participants (row_no, name, affiliation, "position", password, workshop_ids)
   select
     item.ordinality::integer,
     trim(item.value ->> 'name'),
@@ -94,7 +94,7 @@ begin
     ), '{}')
   from jsonb_array_elements(participants_payload) with ordinality as item(value, ordinality);
 
-  if exists (select 1 from tmp_participants where name = '' or affiliation = '' or position = '' or password = '') then
+  if exists (select 1 from tmp_participants where name = '' or affiliation = '' or "position" = '' or password = '') then
     raise exception '이름, 소속, 직책, 조회용 비밀번호는 모두 필수입니다.';
   end if;
 
@@ -158,8 +158,8 @@ begin
   end if;
 
   for participant in select * from tmp_participants order by row_no loop
-    insert into public.registrations (name, affiliation, position, password)
-    values (participant.name, participant.affiliation, participant.position, participant.password)
+    insert into public.registrations (name, affiliation, "position", password)
+    values (participant.name, participant.affiliation, participant."position", participant.password)
     returning id into current_registration_id;
 
     inserted_ids := array_append(inserted_ids, current_registration_id);
@@ -179,7 +179,7 @@ returns table (
   created_at timestamptz,
   name text,
   affiliation text,
-  position text,
+  "position" text,
   workshops jsonb
 )
 language sql
@@ -191,7 +191,7 @@ as $$
     r.created_at,
     r.name,
     r.affiliation,
-    r.position,
+    r."position",
     coalesce(
       jsonb_agg(
         jsonb_build_object('id', w.id, 'title', w.title, 'slot', w.slot)
