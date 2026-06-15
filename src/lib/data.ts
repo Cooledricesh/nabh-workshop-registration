@@ -133,6 +133,17 @@ export async function updateRegistrationWorkshops(input: RepresentativeCredentia
   if (error) throw new Error(error.message);
 }
 
+export async function deleteRegistration(input: RepresentativeCredentials & { registrationId: string }) {
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase.rpc('delete_registration', {
+    lookup_name: input.name,
+    lookup_password: input.password,
+    target_registration_id: input.registrationId,
+  });
+
+  if (error) throw new Error(error.message);
+}
+
 export async function listRegistrations(): Promise<RegistrationRow[]> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase

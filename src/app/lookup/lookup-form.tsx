@@ -1,8 +1,8 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useMemo, useState } from 'react';
 import { getRemainingSeats, isWorkshopSelectable } from '@/lib/registration';
-import type { RegistrationLookupResult, SessionSlot, WorkshopAvailability } from '@/lib/types';
+import type { RegistrationLookupResult, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from '@/lib/types';
 import { lookupRegistrationAction, type LookupState } from '../actions';
 
 function makeInitialState(workshops: WorkshopAvailability[]): LookupState {
@@ -13,27 +13,29 @@ function selectedWorkshopId(registration: RegistrationLookupResult, slot: Sessio
   return registration.workshops.find((workshop) => workshop.slot === slot)?.id ?? '';
 }
 
+function slotLabel(slot: SessionSlot) {
+  return slot === 'morning' ? '오전 워크숍' : '오후 워크숍';
+}
+
 function WorkshopSelect({
-  label,
-  name,
   slot,
   workshops,
-  currentWorkshopId,
+  selectedWorkshopId,
+  onChange,
 }: {
-  label: string;
-  name: string;
   slot: SessionSlot;
   workshops: WorkshopAvailability[];
-  currentWorkshopId: string;
+  selectedWorkshopId: string;
+  onChange: (workshopId: string) => void;
 }) {
   const slotWorkshops = workshops.filter((workshop) => workshop.slot === slot);
   return (
     <div>
-      <label>{label}</label>
-      <select key={`${slot}-${currentWorkshopId}`} name={name} defaultValue={currentWorkshopId}>
+      <label>{slotLabel(slot)}</label>
+      <select value={selectedWorkshopId} onChange={(event) => onChange(event.target.value)}>
         <option value="">선택 안 함</option>
         {slotWorkshops.map((workshop) => {
-          const isCurrent = workshop.id === currentWorkshopId;
+          const isCurrent = workshop.id === selectedWorkshopId;
           const selectable = isCurrent || isWorkshopSelectable(workshop);
           return (
             <option key={workshop.id} value={workshop.id} disabled={!selectable}>
@@ -43,6 +45,76 @@ function WorkshopSelect({
         })}
       </select>
     </div>
+  );
+}
+
+function RegistrationEditForm({
+  registration,
+  workshops,
+  credentials,
+  formAction,
+  pending,
+}: {
+  registration: RegistrationLookupResult;
+  workshops: WorkshopAvailability[];
+  credentials: RepresentativeCredentials;
+  formAction: (payload: FormData) => void;
+  pending: boolean;
+}) {
+  const serverSelectedWorkshopIds = useMemo(
+    () => ({
+      morning: selectedWorkshopId(registration, 'morning'),
+      afternoon: selectedWorkshopId(registration, 'afternoon'),
+    }),
+    [registration],
+  );
+  const [selectedWorkshopIds, setSelectedWorkshopIds] = useState(serverSelectedWorkshopIds);
+
+  useEffect(() => {
+    setSelectedWorkshopIds(serverSelectedWorkshopIds);
+  }, [serverSelectedWorkshopIds]);
+
+  const selectedValues = [selectedWorkshopIds.morning, selectedWorkshopIds.afternoon].filter(Boolean);
+
+  return (
+    <article className="lookup-result-card">
+      <div>
+        <strong>{registration.name}</strong>
+        <p className="muted">{registration.affiliation} · {registration.position}</p>
+        <p className="muted">등록시각: {new Date(registration.createdAt).toLocaleString('ko-KR')}</p>
+      </div>
+      <div className="lookup-edit-stack">
+        <form action={formAction} className="lookup-edit-form">
+          <input type="hidden" name="intent" value="update" />
+          <input type="hidden" name="name" value={credentials.name} />
+          <input type="hidden" name="password" value={credentials.password} />
+          <input type="hidden" name="registrationId" value={registration.id} />
+          {selectedValues.map((workshopId) => (
+            <input key={workshopId} type="hidden" name="workshopIds" value={workshopId} />
+          ))}
+          <WorkshopSelect
+            slot="morning"
+            workshops={workshops}
+            selectedWorkshopId={selectedWorkshopIds.morning}
+            onChange={(workshopId) => setSelectedWorkshopIds((current) => ({ ...current, morning: workshopId }))}
+          />
+          <WorkshopSelect
+            slot="afternoon"
+            workshops={workshops}
+            selectedWorkshopId={selectedWorkshopIds.afternoon}
+            onChange={(workshopId) => setSelectedWorkshopIds((current) => ({ ...current, afternoon: workshopId }))}
+          />
+          <button type="submit" disabled={pending}>{pending ? '변경 중...' : '이 참가자 신청 변경'}</button>
+        </form>
+        <form action={formAction} className="inline-form">
+          <input type="hidden" name="intent" value="delete" />
+          <input type="hidden" name="name" value={credentials.name} />
+          <input type="hidden" name="password" value={credentials.password} />
+          <input type="hidden" name="registrationId" value={registration.id} />
+          <button type="submit" className="danger" disabled={pending}>{pending ? '삭제 중...' : '삭제하기'}</button>
+        </form>
+      </div>
+    </article>
   );
 }
 
@@ -68,42 +140,18 @@ export default function LookupForm({ workshops }: { workshops: WorkshopAvailabil
         <button type="submit" disabled={pending}>{pending ? '조회 중...' : '조회하기'}</button>
       </form>
       {state.message ? <p className={state.ok ? 'success' : 'error'}>{state.message}</p> : null}
-      {state.results.length ? (
+      {state.results.length && credentials ? (
         <div className="lookup-results">
-          {state.results.map((registration) => {
-            const morningId = selectedWorkshopId(registration, 'morning');
-            const afternoonId = selectedWorkshopId(registration, 'afternoon');
-            return (
-              <article key={registration.id} className="lookup-result-card">
-                <div>
-                  <strong>{registration.name}</strong>
-                  <p className="muted">{registration.affiliation} · {registration.position}</p>
-                  <p className="muted">등록시각: {new Date(registration.createdAt).toLocaleString('ko-KR')}</p>
-                </div>
-                <form action={formAction} className="lookup-edit-form">
-                  <input type="hidden" name="intent" value="update" />
-                  <input type="hidden" name="name" value={credentials?.name ?? ''} />
-                  <input type="hidden" name="password" value={credentials?.password ?? ''} />
-                  <input type="hidden" name="registrationId" value={registration.id} />
-                  <WorkshopSelect
-                    label="오전 워크숍"
-                    name="workshopIds"
-                    slot="morning"
-                    workshops={currentWorkshops}
-                    currentWorkshopId={morningId}
-                  />
-                  <WorkshopSelect
-                    label="오후 워크숍"
-                    name="workshopIds"
-                    slot="afternoon"
-                    workshops={currentWorkshops}
-                    currentWorkshopId={afternoonId}
-                  />
-                  <button type="submit" disabled={pending}>{pending ? '변경 중...' : '이 참가자 신청 변경'}</button>
-                </form>
-              </article>
-            );
-          })}
+          {state.results.map((registration) => (
+            <RegistrationEditForm
+              key={registration.id}
+              registration={registration}
+              workshops={currentWorkshops}
+              credentials={credentials}
+              formAction={formAction}
+              pending={pending}
+            />
+          ))}
         </div>
       ) : null}
     </section>

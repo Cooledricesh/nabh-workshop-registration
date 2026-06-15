@@ -355,6 +355,46 @@ begin
 end;
 $$;
 
+drop function if exists public.delete_registration(text, text, uuid);
+
+create or replace function public.delete_registration(
+  lookup_name text,
+  lookup_password text,
+  target_registration_id uuid
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_group_id uuid;
+begin
+  select g.id into target_group_id
+  from public.registration_groups g
+  join public.registrations r on r.group_id = g.id
+  where g.representative_name = trim(lookup_name)
+    and g.password = trim(lookup_password)
+    and r.id = target_registration_id;
+
+  if target_group_id is null then
+    raise exception '일치하는 등록 내역이 없습니다.';
+  end if;
+
+  delete from public.registrations
+  where id = target_registration_id
+    and group_id = target_group_id;
+
+  delete from public.registration_groups g
+  where g.id = target_group_id
+    and not exists (
+      select 1 from public.registrations r where r.group_id = g.id
+    );
+
+  return true;
+end;
+$$;
+
 alter table public.workshops enable row level security;
 alter table public.registration_groups enable row level security;
 alter table public.registrations enable row level security;
@@ -371,6 +411,7 @@ grant select on public.workshops, public.workshops_with_counts to anon, authenti
 grant execute on function public.register_participants_batch(text, text, jsonb) to anon, authenticated;
 grant execute on function public.find_registrations_by_name_password(text, text) to anon, authenticated;
 grant execute on function public.update_registration_workshops(text, text, uuid, jsonb) to anon, authenticated;
+grant execute on function public.delete_registration(text, text, uuid) to anon, authenticated;
 
 delete from public.workshops
 where title in (

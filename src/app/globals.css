@@ -61,6 +61,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .participant-info-row { grid-template-columns: repeat(3, 1fr) auto; }
 .lookup-result-card { display: grid; grid-template-columns: minmax(180px, 0.7fr) 1.3fr; gap: 16px; border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: #fbfcfa; }
 .lookup-edit-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: flex-end; }
+.lookup-edit-stack { display: grid; gap: 10px; }
 .workshop-section { border: 1px solid #d8e6dc; border-radius: 16px; padding: 16px; margin: 0; background: linear-gradient(180deg, #f7fcf9, #ffffff); }
 .workshop-section + .workshop-section { margin-top: 2px; background: linear-gradient(180deg, #fffaf0, #ffffff); border-color: #eadfca; }
 .workshop-section legend { padding: 0 10px; color: var(--accent); font-size: 16px; font-weight: 900; }

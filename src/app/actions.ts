@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { clearAdminSession, isAdminAuthenticated, setAdminSession, verifyAdminPassword } from '@/lib/admin-auth';
 import {
   createWorkshop,
+  deleteRegistration,
   deleteWorkshop,
   listWorkshops,
   lookupRegistrations,
@@ -75,16 +76,20 @@ export async function lookupRegistrationAction(_prev: LookupState, formData: For
     const representative = parseRepresentative(formData);
     const intent = String(formData.get('intent') ?? 'lookup');
 
-    if (intent === 'update') {
+    if (intent === 'update' || intent === 'delete') {
       const registrationId = String(formData.get('registrationId') ?? '');
       if (!registrationId) {
         return { ok: false, message: '수정할 참가자를 찾을 수 없습니다.', results: [], workshops, credentials: representative };
       }
-      await updateRegistrationWorkshops({
-        ...representative,
-        registrationId,
-        workshopIds: parseWorkshopIds(formData),
-      });
+      if (intent === 'delete') {
+        await deleteRegistration({ ...representative, registrationId });
+      } else {
+        await updateRegistrationWorkshops({
+          ...representative,
+          registrationId,
+          workshopIds: parseWorkshopIds(formData),
+        });
+      }
       revalidatePath('/workshops');
       revalidatePath('/lookup');
       revalidatePath('/admin');
@@ -93,12 +98,15 @@ export async function lookupRegistrationAction(_prev: LookupState, formData: For
 
     const results = await lookupRegistrations(representative);
     if (results.length === 0) {
+      if (intent === 'delete') {
+        return { ok: true, message: '참가자 신청을 삭제했습니다. 남은 등록 내역이 없습니다.', results: [], workshops, credentials: representative };
+      }
       return { ok: false, message: '일치하는 등록 내역이 없습니다.', results: [], workshops, credentials: representative };
     }
 
     return {
       ok: true,
-      message: intent === 'update' ? '워크숍 신청 내역을 변경했습니다.' : `${results.length}명의 등록 내역을 찾았습니다.`,
+      message: intent === 'delete' ? '참가자 신청을 삭제했습니다.' : intent === 'update' ? '워크숍 신청 내역을 변경했습니다.' : `${results.length}명의 등록 내역을 찾았습니다.`,
       results,
       workshops,
       credentials: representative,

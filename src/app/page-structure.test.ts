@@ -98,12 +98,15 @@ describe('public page structure and copy', () => {
     expect(rootPage).toContain('/institutions/daum-logo.jpg');
     expect(rootPage).toContain('/institutions/yohan-logo.jpg');
     expect(rootPage).toContain('/institutions/chamsarang-logo.jpg');
-    expect(lookupForm).toContain('key={`${slot}-${currentWorkshopId}`}');
+    expect(lookupForm).toContain('useEffect');
+    expect(lookupForm).toContain('selectedWorkshopIds');
+    expect(lookupForm).toContain('삭제하기');
     expect(lookupPageExists).toBe(true);
     expect(schema).toContain('create table if not exists public.registration_groups');
     expect(schema).toContain('group_id uuid');
     expect(schema).toContain('find_registrations_by_name_password');
     expect(schema).toContain('update_registration_workshops');
+    expect(schema).toContain('delete_registration');
     expect(schema).toContain("'Quality Rights(아주대)', 'morning', 25");
     expect(schema).toContain("'슐렌(참사랑병원)', 'afternoon', 25");
   });
