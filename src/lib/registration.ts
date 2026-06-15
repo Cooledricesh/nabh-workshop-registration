@@ -112,3 +112,14 @@ export function getRemainingSeats(workshop: WorkshopAvailability): number {
 export function isWorkshopSelectable(workshop: WorkshopAvailability): boolean {
   return workshop.isOpen && getRemainingSeats(workshop) > 0;
 }
+
+export function getWorkshopCapacityNotice(workshop: WorkshopAvailability): string | null {
+  const remaining = getRemainingSeats(workshop);
+  if (!workshop.isOpen || remaining <= 0) {
+    return '마감';
+  }
+  if (remaining <= 5) {
+    return `마감 임박 · 잔여 ${remaining}명`;
+  }
+  return null;
+}

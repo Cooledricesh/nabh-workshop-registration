@@ -44,9 +44,14 @@ function parseWorkshops(raw: FormDataEntryValue | null): WorkshopAvailability[] 
 }
 
 function parseRepresentative(formData: FormData): RepresentativeCredentials {
+  const password = String(formData.get('representativePassword') ?? formData.get('password') ?? '');
+  const passwordConfirm = formData.get('representativePasswordConfirm');
+  if (typeof passwordConfirm === 'string' && password !== passwordConfirm) {
+    throw new Error('조회용 비밀번호와 재확인 비밀번호가 일치하지 않습니다.');
+  }
   return validateRepresentativeCredentials({
     name: String(formData.get('representativeName') ?? formData.get('name') ?? ''),
-    password: String(formData.get('representativePassword') ?? formData.get('password') ?? ''),
+    password,
   });
 }
 

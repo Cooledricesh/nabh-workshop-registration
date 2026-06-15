@@ -2,8 +2,8 @@
 
 import { useActionState, useMemo, useState } from 'react';
 import { submitRegistration, type ActionState } from './actions';
-import { getRemainingSeats, isWorkshopSelectable } from '@/lib/registration';
-import type { ParticipantDraft, RepresentativeCredentials, WorkshopAvailability } from '@/lib/types';
+import { getWorkshopCapacityNotice, isWorkshopSelectable } from '@/lib/registration';
+import type { ParticipantDraft, WorkshopAvailability } from '@/lib/types';
 
 type ParticipantFormRow = ParticipantDraft & { id: string };
 
@@ -15,7 +15,9 @@ const initialRow = (): ParticipantFormRow => ({
   workshopIds: [],
 });
 
-const initialRepresentative = (): RepresentativeCredentials => ({ name: '', password: '' });
+type RepresentativeFormState = { name: string; password: string; passwordConfirm: string };
+
+const initialRepresentative = (): RepresentativeFormState => ({ name: '', password: '', passwordConfirm: '' });
 const initialState: ActionState = { ok: false, message: '' };
 
 function setSlotSelection(row: ParticipantFormRow, slotWorkshops: WorkshopAvailability[], workshopId: string) {
@@ -48,6 +50,7 @@ function WorkshopRadioGroup({
         </label>
         {workshops.map((workshop) => {
           const selectable = isWorkshopSelectable(workshop);
+          const capacityNotice = getWorkshopCapacityNotice(workshop);
           return (
             <label key={workshop.id} className={`workshop-option ${selectable ? '' : 'disabled'}`}>
               <input
@@ -57,9 +60,7 @@ function WorkshopRadioGroup({
                 onChange={() => onChange(workshop.id)}
               />
               <strong>{workshop.title}</strong>
-              <span className="muted">
-                {selectable ? `잔여 ${getRemainingSeats(workshop)} / 정원 ${workshop.capacity}` : '마감'}
-              </span>
+              {capacityNotice ? <span className={selectable ? 'capacity-warning' : 'muted'}>{capacityNotice}</span> : null}
             </label>
           );
         })}
@@ -70,7 +71,7 @@ function WorkshopRadioGroup({
 
 export default function RegistrationForm({ workshops }: { workshops: WorkshopAvailability[] }) {
   const [state, formAction, pending] = useActionState(submitRegistration, initialState);
-  const [representative, setRepresentative] = useState<RepresentativeCredentials>(initialRepresentative);
+  const [representative, setRepresentative] = useState<RepresentativeFormState>(initialRepresentative);
   const [isRepresentativeReady, setIsRepresentativeReady] = useState(false);
   const [rows, setRows] = useState<ParticipantFormRow[]>([initialRow()]);
   const morning = useMemo(() => workshops.filter((workshop) => workshop.slot === 'morning'), [workshops]);
@@ -81,6 +82,9 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
     position: row.position,
     workshopIds: row.workshopIds,
   }));
+  const passwordMismatch = Boolean(
+    representative.password && representative.passwordConfirm && representative.password !== representative.passwordConfirm,
+  );
 
   if (!isRepresentativeReady) {
     return (
@@ -105,14 +109,24 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
               required
             />
           </div>
+          <div>
+            <label>비밀번호 재확인</label>
+            <input
+              type="password"
+              value={representative.passwordConfirm}
+              onChange={(event) => setRepresentative((current) => ({ ...current, passwordConfirm: event.target.value }))}
+              required
+            />
+            {passwordMismatch ? <p className="error small-message">비밀번호가 일치하지 않습니다.</p> : null}
+          </div>
           <button
             type="button"
             onClick={() => {
-              if (representative.name.trim() && representative.password.trim()) {
+              if (representative.name.trim() && representative.password.trim() && representative.password === representative.passwordConfirm) {
                 setIsRepresentativeReady(true);
               }
             }}
-            disabled={!representative.name.trim() || !representative.password.trim()}
+            disabled={!representative.name.trim() || !representative.password.trim() || representative.password !== representative.passwordConfirm}
           >
             대표자 확인 후 워크숍 선택하기
           </button>
@@ -125,6 +139,7 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
     <form action={formAction} className="card">
       <input type="hidden" name="representativeName" value={representative.name.trim()} />
       <input type="hidden" name="representativePassword" value={representative.password.trim()} />
+      <input type="hidden" name="representativePasswordConfirm" value={representative.passwordConfirm.trim()} />
       <input type="hidden" name="participants" value={JSON.stringify(participants)} />
       <input type="hidden" name="workshops" value={JSON.stringify(workshops)} />
 
@@ -192,6 +207,13 @@ export default function RegistrationForm({ workshops }: { workshops: WorkshopAva
         <button disabled={pending} type="submit">{pending ? '등록 중...' : '일괄 등록'}</button>
       </div>
       {state.message ? <p className={state.ok ? 'success' : 'error'}>{state.message}</p> : null}
+      {state.ok ? (
+        <div className="success-panel">
+          <strong>등록이 완료되었습니다.</strong>
+          <p>대표자 이름과 조회용 비밀번호로 전체 참가자의 신청 내역을 다시 확인하거나 변경할 수 있습니다. 비밀번호는 운영진이 복구할 수 없으니 꼭 따로 보관해 주세요.</p>
+          <a className="button-link" href="/lookup">내 등록 확인 바로가기</a>
+        </div>
+      ) : null}
       <p className="muted">각 참가자는 오전 1개, 오후 1개까지 선택할 수 있습니다. 선택하지 않아도 등록할 수 있습니다.</p>
     </form>
   );

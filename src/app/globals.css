@@ -20,11 +20,11 @@ main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 40px 0; 
 .workshop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
 .workshop-option { border: 1px solid var(--line); border-radius: 12px; padding: 10px 9px; display: grid; grid-template-columns: auto 1fr; gap: 4px 7px; align-items: start; background: white; min-height: 78px; }
 .workshop-option strong { font-size: 13px; line-height: 1.35; word-break: keep-all; }
-.workshop-option .muted { grid-column: 2; }
+.workshop-option .muted, .workshop-option .capacity-warning { grid-column: 2; }
 .workshop-option.disabled { opacity: 0.55; background: #f3f3f0; }
 label { font-weight: 700; font-size: 14px; }
 input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: white; }
-button, .button { border: 0; border-radius: 10px; background: var(--accent); color: white; padding: 10px 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+button, .button, .button-link { border: 0; border-radius: 10px; background: var(--accent); color: white; padding: 10px 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; width: fit-content; }
 button.secondary, .button.secondary-link { background: #5d675f; }
 button.danger { background: var(--danger); }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -81,6 +81,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .muted { color: var(--muted); font-size: 14px; }
 .error { color: var(--danger); font-weight: 700; }
 .success { color: var(--accent); font-weight: 700; }
+.success-panel { display: grid; gap: 8px; color: #17472a; background: #effaf1; border: 1px solid #b7e4c7; padding: 16px; border-radius: 16px; }
+.capacity-warning { color: #b45309; font-size: 13px; font-weight: 800; }
+.small-message { margin: 6px 0 0; font-size: 13px; }
 table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
 th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; vertical-align: top; }
 .inline-form { display: inline; }

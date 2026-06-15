@@ -88,6 +88,11 @@ describe('public page structure and copy', () => {
     expect(registrationForm).not.toContain('번 참가자 오후 워크숍');
     expect(registrationForm).toContain('대표자 정보');
     expect(registrationForm).toContain('대표자 이름');
+    expect(registrationForm).toContain('비밀번호 재확인');
+    expect(registrationForm).toContain('/lookup');
+    expect(registrationForm).toContain('내 등록 확인');
+    expect(registrationForm).toContain('getWorkshopCapacityNotice');
+    expect(registrationForm).not.toContain('잔여 ${getRemainingSeats(workshop)} / 정원 ${workshop.capacity}');
     expect(registrationForm).toContain('대표자 확인 후 워크숍 선택하기');
     expect(registrationForm).not.toContain('participant.password');
     expect(registrationForm).toContain('조회용 비밀번호');

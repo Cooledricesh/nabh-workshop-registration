@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getWorkshopCapacityNotice,
   RegistrationValidationError,
   summarizeWorkshopDemand,
   validateRepresentativeCredentials,
@@ -98,5 +99,13 @@ describe('summarizeWorkshopDemand', () => {
       ['m1', 2],
       ['a1', 1],
     ]));
+  });
+});
+
+describe('getWorkshopCapacityNotice', () => {
+  it('hides capacity counts until only five or fewer seats remain', () => {
+    expect(getWorkshopCapacityNotice({ id: 'x', title: 'Roomy', slot: 'morning', capacity: 25, registeredCount: 19, isOpen: true })).toBeNull();
+    expect(getWorkshopCapacityNotice({ id: 'x', title: 'Nearly Full', slot: 'morning', capacity: 25, registeredCount: 20, isOpen: true })).toBe('마감 임박 · 잔여 5명');
+    expect(getWorkshopCapacityNotice({ id: 'x', title: 'Full', slot: 'morning', capacity: 25, registeredCount: 25, isOpen: true })).toBe('마감');
   });
 });

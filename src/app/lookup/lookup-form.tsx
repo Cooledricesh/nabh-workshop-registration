@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
-import { getRemainingSeats, isWorkshopSelectable } from '@/lib/registration';
+import { getWorkshopCapacityNotice, isWorkshopSelectable } from '@/lib/registration';
 import type { RegistrationLookupResult, RepresentativeCredentials, SessionSlot, WorkshopAvailability } from '@/lib/types';
 import { lookupRegistrationAction, type LookupState } from '../actions';
 
@@ -37,9 +37,10 @@ function WorkshopSelect({
         {slotWorkshops.map((workshop) => {
           const isCurrent = workshop.id === selectedWorkshopId;
           const selectable = isCurrent || isWorkshopSelectable(workshop);
+          const capacityNotice = getWorkshopCapacityNotice(workshop);
           return (
             <option key={workshop.id} value={workshop.id} disabled={!selectable}>
-              {workshop.title} · {selectable ? `잔여 ${getRemainingSeats(workshop)} / 정원 ${workshop.capacity}` : '마감'}
+              {capacityNotice ? `${workshop.title} · ${capacityNotice}` : workshop.title}
             </option>
           );
         })}
