@@ -96,6 +96,9 @@ from public.workshops w
 left join public.registration_workshops rw on rw.workshop_id = w.id
 group by w.id;
 
+drop function if exists public.register_participants_batch(jsonb);
+drop function if exists public.register_participants_batch(text, text, jsonb);
+
 create or replace function public.register_participants_batch(
   representative_name_input text,
   representative_password_input text,
@@ -228,6 +231,8 @@ begin
 end;
 $$;
 
+drop function if exists public.find_registrations_by_name_password(text, text);
+
 create or replace function public.find_registrations_by_name_password(lookup_name text, lookup_password text)
 returns table (
   group_id uuid,
@@ -265,6 +270,8 @@ as $$
   group by g.id, r.id
   order by r.created_at asc;
 $$;
+
+drop function if exists public.update_registration_workshops(text, text, uuid, jsonb);
 
 create or replace function public.update_registration_workshops(
   lookup_name text,
