@@ -36,6 +36,7 @@ describe('public page structure and copy', () => {
     const rootPage = read('src/app/page.tsx');
     const schema = read('schema.sql');
     const registrationForm = read('src/app/registration-form.tsx');
+    const lookupForm = read('src/app/lookup/lookup-form.tsx');
     const lookupPageExists = existsSync(join(appDir, 'lookup', 'page.tsx'));
 
     for (const text of [
@@ -97,6 +98,7 @@ describe('public page structure and copy', () => {
     expect(rootPage).toContain('/institutions/daum-logo.jpg');
     expect(rootPage).toContain('/institutions/yohan-logo.jpg');
     expect(rootPage).toContain('/institutions/chamsarang-logo.jpg');
+    expect(lookupForm).toContain('key={`${slot}-${currentWorkshopId}`}');
     expect(lookupPageExists).toBe(true);
     expect(schema).toContain('create table if not exists public.registration_groups');
     expect(schema).toContain('group_id uuid');

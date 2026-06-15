@@ -70,7 +70,7 @@ export async function submitRegistration(_prev: ActionState, formData: FormData)
 }
 
 export async function lookupRegistrationAction(_prev: LookupState, formData: FormData): Promise<LookupState> {
-  const workshops = await listWorkshops();
+  let workshops = await listWorkshops();
   try {
     const representative = parseRepresentative(formData);
     const intent = String(formData.get('intent') ?? 'lookup');
@@ -88,6 +88,7 @@ export async function lookupRegistrationAction(_prev: LookupState, formData: For
       revalidatePath('/workshops');
       revalidatePath('/lookup');
       revalidatePath('/admin');
+      workshops = await listWorkshops();
     }
 
     const results = await lookupRegistrations(representative);

@@ -30,7 +30,7 @@ function WorkshopSelect({
   return (
     <div>
       <label>{label}</label>
-      <select name={name} defaultValue={currentWorkshopId}>
+      <select key={`${slot}-${currentWorkshopId}`} name={name} defaultValue={currentWorkshopId}>
         <option value="">선택 안 함</option>
         {slotWorkshops.map((workshop) => {
           const isCurrent = workshop.id === currentWorkshopId;
