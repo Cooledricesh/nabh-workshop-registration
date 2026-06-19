@@ -65,7 +65,6 @@ describe('public page structure and copy', () => {
       '천주의성요한병원',
       '참사랑병원',
       '아주대학교병원 정신건강의학과',
-      '국립정신건강센터',
     ]) {
       expect(rootPage).toContain(text);
     }
@@ -106,7 +105,8 @@ describe('public page structure and copy', () => {
     expect(rootPage).toContain('이후 30분간 자유시간');
     expect(rootPage).not.toContain('90분 진행 · 이후 자유시간');
     expect(rootPage).toContain('http://www.eumhospital.co.kr/');
-    expect(rootPage).toContain('https://www.ncmh.go.kr/');
+    expect(rootPage).not.toContain('국립정신건강센터');
+    expect(rootPage).not.toContain('https://www.ncmh.go.kr/');
     expect(rootPage).toContain('http://www.kapr.or.kr/');
     expect(rootPage).toContain('/institutions/kapr-logo.jpg');
     expect(rootPage).toContain('/institutions/daum-logo.jpg');

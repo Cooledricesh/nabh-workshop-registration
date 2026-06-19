@@ -31,7 +31,6 @@ const institutionLinks = [
   { name: '천주의성요한병원', url: 'http://www.yohanhos.or.kr/', logo: '/institutions/yohan-logo.jpg' },
   { name: '참사랑병원', url: 'http://www.clh.co.kr/', logo: '/institutions/chamsarang-logo.jpg' },
   { name: '아주대학교병원 정신건강의학과', url: 'https://hosp.ajoumc.or.kr/dept/deptView.do?deptNo=22&deptCd=PSY', logo: '/institutions/institution-6.png' },
-  { name: '국립정신건강센터', url: 'https://www.ncmh.go.kr/', logo: '/institutions/institution-7.jpg' },
 ];
 
 const schedule = [
